@@ -1,16 +1,41 @@
 {
-  "name": "vex-js",
-  "version": "1.0.0",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "devDependencies": {
-    "typescript": "^5.7.3"
-  }
+	"name": "vex-js",
+	"version": "1.0.0",
+	"author": "rhawk117",
+	"license": "ISC",
+	"description": "A light weight Vanilla Extension (VEX) for vanilla and jquery like code.",
+	"type": "module",
+	"types": "dist/index.d.ts",
+	"main": "dist/index.umd.js",
+	"module": "dist/index.esm.js",
+	"scripts": {
+		"build": "rollup -c",
+		"prepublishOnly": "npm run build",
+		"test": "echo \"No tests specified\" && exit 0"
+	},
+	"files": [
+		"dist",
+		"dist/vex-animations.css"
+	],
+	"keywords": [
+		"vex",
+		"js",
+		"typescript",
+		"vanilla",
+		"animations",
+		"reactive",
+		"css"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/rhawk117/vex-js.git"
+	},
+	"devDependencies": {
+		"@rollup/plugin-commonjs": "^28.0.2",
+		"@rollup/plugin-json": "^6.1.0",
+		"@rollup/plugin-node-resolve": "^16.0.0",
+		"rollup": "^4.34.8",
+		"rollup-plugin-typescript2": "^0.36.0",
+		"typescript": "^5.7.3"
+	}
 }
