@@ -1,31 +1,31 @@
 /**
- * @file VexDoc.ts
- * @description Document-level utilities for working with VexElement.
+ * @file vex-doc.ts
+ * @description Document-level utilities for working with VexdElement.
  */
-import { VexElement } from "./vex-element";
-export declare class vexd {
+import { VexdElement } from "./vexd-element";
+export declare class vexdoc {
     /**
-     * equivalent to document.querySelector, but returns a VexElement instance.
+     * equivalent to document.querySelector, but returns a VexdElement instance.
      * @param {string} selector - CSS selector.
-     * @returns {VexElement} A VexElement instance wrapping the selected element.
+     * @returns {VexdElement} A VexdElement instance wrapping the selected element.
      * @throws Will throw an error if no element is found.
      */
-    static select(selector: string): VexElement;
+    static select(selector: string): VexdElement;
     /**
-     * returns a VexElement instance, equivalent to document.getElementById.
+     * returns a VexdElement instance, equivalent to document.getElementById.
      * @param {string} id - The element's id.
-     * @returns {VexElement} a VexElement instance.
+     * @returns {VexdElement} a VexdElement instance.
      * @throws will throw an error if no element is found.
      */
-    static id(id: string): VexElement;
+    static id(id: string): VexdElement;
     /**
-     * equivalent to document.querySelectorAll, but returns an array of VexElement instances.
+     * equivalent to document.querySelectorAll, but returns an array of VexdElement instances.
      * @param {string} selector - CSS selector.
-     * @param {(vex: VexElement, index: number) => void} callback - Callback for each element.
-     * @returns {VexElement[]} Array of VexElement instances.
+     * @param {(vex: VexdElement, index: number) => void} callback - Callback for each element.
+     * @returns {VexdElement[]} Array of VexdElement instances.
      */
-    static each(selector: string, callback: (vex: VexElement, index: number) => void): void;
-    static all(selector: string): VexElement[];
+    static each(selector: string, callback: (vex: VexdElement, index: number) => void): void;
+    static all(selector: string): VexdElement[];
     /**
      * executes a callback once the DOM is fully loaded.
      * @param {() => void} callback - Callback function.
@@ -47,40 +47,40 @@ export declare class vexd {
     /**
      * imports a CSS file into the document by creating a <link> element.
      * @param {string} cssPath - Path to the CSS file.
-     * @returns {VexElement} A VexElement instance wrapping the created <link> element.
+     * @returns {VexdElement} A VexdElement instance wrapping the created <link> element.
      */
-    static importCSS(cssPath: string): VexElement;
+    static importCSS(cssPath: string): VexdElement;
     /**
      * removes CSS files that include the given file name.
      * @param {string} cssFileName - Partial name of the CSS file.
-     * @returns {VexElement[]} Array of VexElement instances for the removed elements.
+     * @returns {VexdElement[]} Array of VexdElement instances for the removed elements.
      */
-    static removeCSS(cssFileName: string): VexElement[];
+    static removeCSS(cssFileName: string): VexdElement[];
     /**
      * creates a new element in the document, returned as a vex element.
      * @param {string} elementName - The tag name for the element.
-     * @returns {VexElement} A VexElement instance wrapping the new element.
+     * @returns {VexdElement} A VexdElement instance wrapping the new element.
      */
-    static create(elementName: string): VexElement;
+    static create(elementName: string): VexdElement;
     /**
      * gets all of the forms in the document with an optional selector to filter them
      * by
      * @param {string} [optionalSelector] - Optional CSS selector to filter forms.
-     * @returns {VexElement[]} Array of VexElement instances wrapping form elements.
+     * @returns {VexdElement[]} Array of VexdElement instances wrapping form elements.
      */
-    static forms(optionalSelector?: string): VexElement[];
+    static forms(optionalSelector?: string): VexdElement[];
     /**
      * equivalent to document.getElementsByTagName
      * @param {string} tagName - The tag name.
-     * @returns {VexElement[]} Array of VexElement instances.
+     * @returns {VexdElement[]} Array of VexdElement instances.
      */
-    static tags(tagName: string): VexElement[];
+    static tags(tagName: string): VexdElement[];
     /**
      * equivalent to document.getElementsByClassName
      * @param {string} className - The class name.
-     * @returns {VexElement[]} Array of VexElement instances.
+     * @returns {VexdElement[]} Array of VexdElement instances.
      */
-    static classed(className: string): VexElement[];
+    static className(className: string): VexdElement[];
     /**
      * Provides a reactive signal mechanism.
      * @template T
@@ -88,8 +88,9 @@ export declare class vexd {
      * @returns {[ (cb: (oldValue: T, newValue: T) => void) => void, (newValue: T) => void ]}
      * Subscribe and setState functions.
      */
-    static signal<T>(initialValue: T): [
-        subscribe: (cb: (oldValue: T, newValue: T) => void) => void,
-        setState: (newValue: T) => void
-    ];
+    static signal<T>(initialValue: T): {
+        subscribe: (cb: (oldValue: T, newValue: T) => void) => void;
+        setState: (newValue: T) => void;
+        getState: () => T;
+    };
 }

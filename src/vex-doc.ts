@@ -1,55 +1,55 @@
 /**
- * @file VexDoc.ts
- * @description Document-level utilities for working with VexElement.
+ * @file vex-doc.ts
+ * @description Document-level utilities for working with VexdElement.
  */
 
-import { VexElement } from "./vex-element";
+import { VexdElement } from "./vexd-element";
 
-export class vexd {
+export class vexdoc {
 	/**
-	 * equivalent to document.querySelector, but returns a VexElement instance.
+	 * equivalent to document.querySelector, but returns a VexdElement instance.
 	 * @param {string} selector - CSS selector.
-	 * @returns {VexElement} A VexElement instance wrapping the selected element.
+	 * @returns {VexdElement} A VexdElement instance wrapping the selected element.
 	 * @throws Will throw an error if no element is found.
 	 */
-	static select(selector: string): VexElement {
+	static select(selector: string): VexdElement {
 		const el = document.querySelector(selector);
 		if (!el) throw new Error(`Element not found for selector: ${selector}`);
-		return new VexElement(el as HTMLElement);
+		return new VexdElement(el as HTMLElement);
 	}
 
 	/**
-	 * returns a VexElement instance, equivalent to document.getElementById.
+	 * returns a VexdElement instance, equivalent to document.getElementById.
 	 * @param {string} id - The element's id.
-	 * @returns {VexElement} a VexElement instance.
+	 * @returns {VexdElement} a VexdElement instance.
 	 * @throws will throw an error if no element is found.
 	 */
-	static id(id: string): VexElement {
+	static id(id: string): VexdElement {
 		const el = document.getElementById(id);
 		if (!el) throw new Error(`Element not found with id: ${id}`);
-		return new VexElement(el);
+		return new VexdElement(el);
 	}
 
 	/**
-	 * equivalent to document.querySelectorAll, but returns an array of VexElement instances.
+	 * equivalent to document.querySelectorAll, but returns an array of VexdElement instances.
 	 * @param {string} selector - CSS selector.
-	 * @param {(vex: VexElement, index: number) => void} callback - Callback for each element.
-	 * @returns {VexElement[]} Array of VexElement instances.
+	 * @param {(vex: VexdElement, index: number) => void} callback - Callback for each element.
+	 * @returns {VexdElement[]} Array of VexdElement instances.
 	 */
 	static each(
 		selector: string,
-		callback: (vex: VexElement, index: number) => void
+		callback: (vex: VexdElement, index: number) => void
 	): void {
 		const nodeList = document.querySelectorAll(selector);
 		Array.from(nodeList).forEach((el, index) => {
-			const vex = new VexElement(el as HTMLElement);
+			const vex = new VexdElement(el as HTMLElement);
 			callback(vex, index);
 		});
 	}
 
-	static all(selector: string): VexElement[] {
+	static all(selector: string): VexdElement[] {
 		const nodeList = document.querySelectorAll(selector);
-		return Array.from(nodeList).map((el) => new VexElement(el as HTMLElement));
+		return Array.from(nodeList).map((el) => new VexdElement(el as HTMLElement));
 	}
 
 	/**
@@ -88,30 +88,30 @@ export class vexd {
 	/**
 	 * imports a CSS file into the document by creating a <link> element.
 	 * @param {string} cssPath - Path to the CSS file.
-	 * @returns {VexElement} A VexElement instance wrapping the created <link> element.
+	 * @returns {VexdElement} A VexdElement instance wrapping the created <link> element.
 	 */
-	static importCSS(cssPath: string): VexElement {
+	static importCSS(cssPath: string): VexdElement {
 		const link = document.createElement("link");
 		link.rel = "stylesheet";
 		link.href = cssPath;
 		document.head.appendChild(link);
-		return new VexElement(link as HTMLElement);
+		return new VexdElement(link as HTMLElement);
 	}
 
 	/**
 	 * removes CSS files that include the given file name.
 	 * @param {string} cssFileName - Partial name of the CSS file.
-	 * @returns {VexElement[]} Array of VexElement instances for the removed elements.
+	 * @returns {VexdElement[]} Array of VexdElement instances for the removed elements.
 	 */
-	static removeCSS(cssFileName: string): VexElement[] {
+	static removeCSS(cssFileName: string): VexdElement[] {
 		const links = Array.from(
 			document.querySelectorAll('link[rel="stylesheet"]')
 		);
-		const removed: VexElement[] = [];
+		const removed: VexdElement[] = [];
 		links.forEach((link) => {
 			if (link.getAttribute("href")?.includes(cssFileName)) {
 				link.remove();
-				removed.push(new VexElement(link as HTMLElement));
+				removed.push(new VexdElement(link as HTMLElement));
 			}
 		});
 		return removed;
@@ -120,47 +120,47 @@ export class vexd {
 	/**
 	 * creates a new element in the document, returned as a vex element.
 	 * @param {string} elementName - The tag name for the element.
-	 * @returns {VexElement} A VexElement instance wrapping the new element.
+	 * @returns {VexdElement} A VexdElement instance wrapping the new element.
 	 */
-	static create(elementName: string): VexElement {
+	static create(elementName: string): VexdElement {
 		const el = document.createElement(elementName);
-		return new VexElement(el);
+		return new VexdElement(el);
 	}
 
 	/**
 	 * gets all of the forms in the document with an optional selector to filter them
 	 * by
 	 * @param {string} [optionalSelector] - Optional CSS selector to filter forms.
-	 * @returns {VexElement[]} Array of VexElement instances wrapping form elements.
+	 * @returns {VexdElement[]} Array of VexdElement instances wrapping form elements.
 	 */
-	static forms(optionalSelector?: string): VexElement[] {
+	static forms(optionalSelector?: string): VexdElement[] {
 		let forms: HTMLCollectionOf<HTMLFormElement>;
 		if (optionalSelector) {
 			forms = document.querySelectorAll(`form${optionalSelector}`) as any;
 		} else {
 			forms = document.getElementsByTagName("form");
 		}
-		return Array.from(forms).map((el) => new VexElement(el as HTMLElement));
+		return Array.from(forms).map((el) => new VexdElement(el as HTMLElement));
 	}
 
 	/**
 	 * equivalent to document.getElementsByTagName
 	 * @param {string} tagName - The tag name.
-	 * @returns {VexElement[]} Array of VexElement instances.
+	 * @returns {VexdElement[]} Array of VexdElement instances.
 	 */
-	static tags(tagName: string): VexElement[] {
+	static tags(tagName: string): VexdElement[] {
 		const tags = document.getElementsByTagName(tagName);
-		return Array.from(tags).map((el) => new VexElement(el as HTMLElement));
+		return Array.from(tags).map((el) => new VexdElement(el as HTMLElement));
 	}
 
 	/**
 	 * equivalent to document.getElementsByClassName
 	 * @param {string} className - The class name.
-	 * @returns {VexElement[]} Array of VexElement instances.
+	 * @returns {VexdElement[]} Array of VexdElement instances.
 	 */
-	static classed(className: string): VexElement[] {
+	static className(className: string): VexdElement[] {
 		const elements = document.getElementsByClassName(className);
-		return Array.from(elements).map((el) => new VexElement(el as HTMLElement));
+		return Array.from(elements).map((el) => new VexdElement(el as HTMLElement));
 	}
 
 	/**
@@ -170,12 +170,11 @@ export class vexd {
 	 * @returns {[ (cb: (oldValue: T, newValue: T) => void) => void, (newValue: T) => void ]}
 	 * Subscribe and setState functions.
 	 */
-	static signal<T>(
-		initialValue: T
-	): [
-		subscribe: (cb: (oldValue: T, newValue: T) => void) => void,
-		setState: (newValue: T) => void
-	] {
+	static signal<T>(initialValue: T): {
+		subscribe: (cb: (oldValue: T, newValue: T) => void) => void;
+		setState: (newValue: T) => void;
+		getState: () => T;
+	} {
 		let state = initialValue;
 		const subscribers: Array<(oldValue: T, newValue: T) => void> = [];
 		const subscribe = (cb: (oldValue: T, newValue: T) => void) => {
@@ -186,10 +185,7 @@ export class vexd {
 			state = newValue;
 			subscribers.forEach((cb) => cb(oldValue, newValue));
 		};
-		return [subscribe, setState];
+		const getState = () => state;
+		return { subscribe, setState, getState };
 	}
-
-	
-
-
 }

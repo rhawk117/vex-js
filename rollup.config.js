@@ -29,7 +29,7 @@ export default [
 		output: {
 			file: packageJson.main, // e.g. "dist/index.umd.js"
 			format: "umd",
-			name: "Vex",
+			name: "Vexd",
 			sourcemap: true,
 		},
 		plugins: [

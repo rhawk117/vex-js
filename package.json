@@ -1,5 +1,5 @@
 {
-	"name": "vex-js",
+	"name": "vexd-js",
 	"version": "1.0.0",
 	"author": "rhawk117",
 	"license": "ISC",
@@ -14,11 +14,10 @@
 		"test": "echo \"No tests specified\" && exit 0"
 	},
 	"files": [
-		"dist",
-		"dist/vex-animations.css"
+		"dist"
 	],
 	"keywords": [
-		"vex",
+		"vexd",
 		"js",
 		"typescript",
 		"vanilla",

@@ -1,14 +1,14 @@
 /**
- * @file VexElement.ts
+ * @file vexd-element.ts
  * @description A lightweight DOM utility class for chainable element manipulation, animations, and reactive signals.
  */
 
-export class VexElement {
+export class VexdElement {
 	private el: HTMLElement;
 	private static animationsInjected: boolean = false;
 
 	/**
-	 * creates an instance of VexElement.
+	 * creates an instance of VexdElement.
 	 * @param {HTMLElement | string} element - A DOM element or a CSS selector string.
 	 * @throws Will throw an error if the element is not found.
 	 */
@@ -26,17 +26,17 @@ export class VexElement {
 
 
 	/**
-	 * returns a new VexElement instance wrapping the first descendant matching the selector.
+	 * returns a new VexdElement instance wrapping the first descendant matching the selector.
 	 * @param {string} selector - CSS selector to search for.
-	 * @returns {VexElement} A new VexElement instance.
+	 * @returns {VexdElement} A new VexdElement instance.
 	 * @throws Will throw an error if no element is found.
 	 */
-	select(selector: string): VexElement {
+	select(selector: string): VexdElement {
 		const found = this.el.querySelector(selector);
 		if (!found) {
 			throw new Error(`VexJS: element not found for selector: ${selector}`);
 		}
-		return new VexElement(found as HTMLElement);
+		return new VexdElement(found as HTMLElement);
 	}
 
 	/**
@@ -48,10 +48,10 @@ export class VexElement {
 	/**
 	 * Selects an element by id.
 	 * @param elementId {string}
-	 * @returns {VexElement} A new VexElement instance.
+	 * @returns {VexdElement} A new VexdElement instance.
 	 */
-	id(elementId: string): VexElement;
-	id(elementId?: string): string | VexElement {
+	id(elementId: string): VexdElement;
+	id(elementId?: string): string | VexdElement {
 		if (elementId === undefined) {
 			return this.el.id;
 		}
@@ -59,27 +59,27 @@ export class VexElement {
 	}
 
 	/**
-	 * Returns an array of VexElement instances for all descendants matching the selector.
+	 * Returns an array of VexdElement instances for all descendants matching the selector.
 	 * @param {string} selector - CSS selector to search for.
-	 * @returns {VexElement[]} Array of VexElement instances.
+	 * @returns {VexdElement[]} Array of VexdElement instances.
 	 */
-	all(selector: string): VexElement[] {
+	all(selector: string): VexdElement[] {
 		const nodeList = this.el.querySelectorAll(selector);
-		return Array.from(nodeList).map((el) => new VexElement(el as HTMLElement));
+		return Array.from(nodeList).map((el) => new VexdElement(el as HTMLElement));
 	}
 
 	/**
 	 * Iterates over each descendant matching the selector, invoking the callback.
 	 * @param {string} selector - CSS selector to search for.
-	 * @param {(VexElement: VexElement, index: number) => void} callback - Function to call for each element.
-	 * @returns {VexElement[]} Array of VexElement instances.
+	 * @param {(VexdElement: VexdElement, index: number) => void} callback - Function to call for each element.
+	 * @returns {VexdElement[]} Array of VexdElement instances.
 	 */
 	each(
 		selector: string,
-		callback: (VexElement: VexElement, index: number) => void
-	): VexElement[] {
+		callback: (VexdElement: VexdElement, index: number) => void
+	): VexdElement[] {
 		const elements = this.all(selector);
-		elements.forEach((VexElement, index) => callback(VexElement, index));
+		elements.forEach((VexdElement, index) => callback(VexdElement, index));
 		return elements;
 	}
 
@@ -92,10 +92,10 @@ export class VexElement {
 	/**
 	 * sets the inner HTML and returns the instance.
 	 * @param {string} content - HTML content.
-	 * @returns {VexElement} The current VexElement instance.
+	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	html(content: string): VexElement;
-	html(content?: string): string | VexElement {
+	html(content: string): VexdElement;
+	html(content?: string): string | VexdElement {
 		if (content === undefined) {
 			return this.el.innerHTML;
 		} else {
@@ -113,10 +113,10 @@ export class VexElement {
 	/**
 	 * sets the text content and returns the instance.
 	 * @param {string} content - Text content.
-	 * @returns {VexElement} The current VexElement instance.
+	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	text(content: string): VexElement;
-	text(content?: string): string | VexElement {
+	text(content: string): VexdElement;
+	text(content?: string): string | VexdElement {
 		if (content === undefined) {
 			return this.el.textContent || "";
 		} else {
@@ -142,9 +142,9 @@ export class VexElement {
 	 * adds an event listener that is automatically removed after one invocation.
 	 * @param {string} eventName - Event name.
 	 * @param {(e: Event) => void} callback - Callback function.
-	 * @returns {VexElement} The current VexElement instance.
+	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	once(eventName: string, callback: (e: Event) => void): VexElement {
+	once(eventName: string, callback: (e: Event) => void): VexdElement {
 		this.el.addEventListener(eventName, callback, { once: true });
 		return this;
 	}
@@ -153,9 +153,9 @@ export class VexElement {
 	 * Dispatches a custom event.
 	 * @param {string} eventName - Custom event name.
 	 * @param {{ [key: string]: any }} [details={}] - Event details.
-	 * @returns {VexElement} The current VexElement instance.
+	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	emit(eventName: string, details: { [key: string]: any } = {}): VexElement {
+	emit(eventName: string, details: { [key: string]: any } = {}): VexdElement {
 		const event = new CustomEvent(eventName, { detail: details });
 		this.el.dispatchEvent(event);
 		return this;
@@ -168,9 +168,9 @@ export class VexElement {
 	/**
 	 * Adds a class to the element.
 	 * @param {string} className - Class name to add.
-	 * @returns {VexElement} The current VexElement instance.
+	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	classed(className: string): VexElement {
+	classed(className: string): VexdElement {
 		this.el.classList.add(className);
 		return this;
 	}
@@ -178,9 +178,9 @@ export class VexElement {
 	/**
 	 * Removes a class from the element.
 	 * @param {string} className - Class name to remove.
-	 * @returns {VexElement} The current VexElement instance.
+	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	declass(className: string): VexElement {
+	declass(className: string): VexdElement {
 		this.el.classList.remove(className);
 		return this;
 	}
@@ -188,9 +188,9 @@ export class VexElement {
 	/**
 	 * Toggles a class on the element.
 	 * @param {string} className - Class name to toggle.
-	 * @returns {VexElement} The current VexElement instance.
+	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	toggleClass(className: string): VexElement {
+	toggleClass(className: string): VexdElement {
 		this.el.classList.toggle(className);
 		return this;
 	}
@@ -215,10 +215,10 @@ export class VexElement {
 	 * Sets an attribute and returns the instance.
 	 * @param {string} attribute - Attribute name.
 	 * @param {string} value - Attribute value.
-	 * @returns {VexElement} The current VexElement instance.
+	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	attr(attribute: string, value: string): VexElement;
-	attr(attribute: string, value?: string): string | VexElement {
+	attr(attribute: string, value: string): VexdElement;
+	attr(attribute: string, value?: string): string | VexdElement {
 		if (value === undefined) {
 			return this.el.getAttribute(attribute) || "";
 		} else {
@@ -247,10 +247,10 @@ export class VexElement {
 	 * sets a data attribute and returns the instance.
 	 * @param {string} attribute - Data attribute name.
 	 * @param {string} value - Data attribute value.
-	 * @returns {VexElement} The current VexElement instance.
+	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	data(attribute: string, value: string): VexElement;
-	data(attribute: string, value?: string): string | VexElement {
+	data(attribute: string, value: string): VexdElement;
+	data(attribute: string, value?: string): string | VexdElement {
 		if (value === undefined) {
 			return this.el.dataset[attribute] || "";
 		} else {
@@ -270,10 +270,10 @@ export class VexElement {
 	 * Sets a style property and returns the instance.
 	 * @param {string} property - CSS property name.
 	 * @param {string} value - CSS property value.
-	 * @returns {VexElement} The current VexElement instance.
+	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	style(property: string, value: string): VexElement;
-	style(property: string, value?: string): string | VexElement {
+	style(property: string, value: string): VexdElement;
+	style(property: string, value?: string): string | VexdElement {
 		if (value === undefined) {
 			return this.el.style.getPropertyValue(property);
 		} else {
@@ -295,10 +295,10 @@ export class VexElement {
 	 * @template T
 	 * @param {keyof T} propertyName - The property name.
 	 * @param {T[keyof T]} value - The new value.
-	 * @returns {VexElement} The current VexElement instance.
+	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	prop<T>(propertyName: keyof T, value: T[keyof T]): VexElement;
-	prop<T>(propertyName: keyof T, value?: T[keyof T]): T[keyof T] | VexElement {
+	prop<T>(propertyName: keyof T, value: T[keyof T]): VexdElement;
+	prop<T>(propertyName: keyof T, value?: T[keyof T]): T[keyof T] | VexdElement {
 		if (value === undefined) {
 			return (this.el as any)[propertyName];
 		} else {
@@ -310,54 +310,54 @@ export class VexElement {
 	/**
 	 * Filters descendant elements matching the selector and predicate.
 	 * @param {string} selector - CSS selector.
-	 * @param {(VexElement: VexElement) => boolean} predicate - Predicate function.
-	 * @returns {VexElement[]} Array of VexElement instances that match the predicate.
+	 * @param {(VexdElement: VexdElement) => boolean} predicate - Predicate function.
+	 * @returns {VexdElement[]} Array of VexdElement instances that match the predicate.
 	 */
 	where(
 		selector: string,
-		predicate: (VexElement: VexElement) => boolean
-	): VexElement[] {
-		return this.all(selector).filter((VexElement) => predicate(VexElement));
+		predicate: (VexdElement: VexdElement) => boolean
+	): VexdElement[] {
+		return this.all(selector).filter((VexdElement) => predicate(VexdElement));
 	}
 
 	/**
 	 * filters descendant elements matching the selector that do NOT satisfy the predicate.
 	 * @param {string} selector - CSS selector.
-	 * @param {(VexElement: VexElement) => boolean} predicate - Predicate function.
-	 * @returns {VexElement[]} Array of VexElement instances that do not match the predicate.
+	 * @param {(VexdElement: VexdElement) => boolean} predicate - Predicate function.
+	 * @returns {VexdElement[]} Array of VexdElement instances that do not match the predicate.
 	 */
 	excluding(
 		selector: string,
-		predicate: (vexEl: VexElement) => boolean
-	): VexElement[] {
+		predicate: (vexEl: VexdElement) => boolean
+	): VexdElement[] {
 		return this.all(selector).filter((vEl) => !predicate(vEl));
 	}
 
 	/**
 	 * returns the closest ancestor (or self) that matches the selector.
 	 * @param {string} selector - CSS selector.
-	 * @returns {VexElement | null} Closest matching VexElement instance or null.
+	 * @returns {VexdElement | null} Closest matching VexdElement instance or null.
 	 */
-	closest(selector: string): VexElement | null {
+	closest(selector: string): VexdElement | null {
 		const found = this.el.closest(selector);
-		return found ? new VexElement(found as HTMLElement) : null;
+		return found ? new VexdElement(found as HTMLElement) : null;
 	}
 
 	/**
-	 * returns the parent element as a VexElement instance.
-	 * @returns {VexElement | null} The parent VexElement instance or null.
+	 * returns the parent element as a VexdElement instance.
+	 * @returns {VexdElement | null} The parent VexdElement instance or null.
 	 */
-	parent(): VexElement | null {
-		return this.el.parentElement ? new VexElement(this.el.parentElement) : null;
+	parent(): VexdElement | null {
+		return this.el.parentElement ? new VexdElement(this.el.parentElement) : null;
 	}
 
 	/**
-	 * returns an array of children as VexElement instances.
-	 * @returns {VexElement[]} Array of child VexElement instances.
+	 * returns an array of children as VexdElement instances.
+	 * @returns {VexdElement[]} Array of child VexdElement instances.
 	 */
-	children(): VexElement[] {
+	children(): VexdElement[] {
 		return Array.from(this.el.children).map(
-			(child) => new VexElement(child as HTMLElement)
+			(child) => new VexdElement(child as HTMLElement)
 		);
 	}
 
@@ -425,9 +425,9 @@ export class VexElement {
 	 * Adds a class to the element for a specified time (ms) or until a promise resolves.
 	 * @param {string} className - Class name to add.
 	 * @param {number | Promise<any>} duration - Duration in ms or a promise.
-	 * @returns {VexElement} The current VexElement instance.
+	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	timedClass(className: string, duration: number | Promise<any>): VexElement {
+	timedClass(className: string, duration: number | Promise<any>): VexdElement {
 		this.classed(className);
 		if (typeof duration === "number") {
 			setTimeout(() => {
@@ -444,8 +444,8 @@ export class VexElement {
 	 * @private
 	 */
 	private static ensureAnimationsInjected(): void {
-		if (VexElement.animationsInjected) return;
-		VexElement.animationsInjected = true;
+		if (VexdElement.animationsInjected) return;
+		VexdElement.animationsInjected = true;
 	}
 
 	/**
@@ -454,14 +454,14 @@ export class VexElement {
 	 * @param {string} animationClass - CSS class for the animation.
 	 * @param {number} duration - Duration of the animation in ms.
 	 * @param {() => void} [onComplete] - Optional callback after animation.
-	 * @returns {VexElement} The current VexElement instance.
+	 * @returns {VexdElement} The current VexdElement instance.
 	 */
 	private animateClass(
 		animationClass: string,
 		duration: number,
 		onComplete?: () => void
-	): VexElement {
-		VexElement.ensureAnimationsInjected();
+	): VexdElement {
+		VexdElement.ensureAnimationsInjected();
 		this.el.style.setProperty("--vex-duration", `${duration}ms`);
 		this.classed(animationClass);
 		setTimeout(() => {
@@ -475,9 +475,9 @@ export class VexElement {
 	 * fades in the element.
 	 * @param {number} duration - Duration in ms.
 	 * @param {() => void} [onComplete] - Callback after animation completes.
-	 * @returns {VexElement} The current VexElement instance.
+	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	fadeIn(duration: number, onComplete?: () => void): VexElement {
+	fadeIn(duration: number, onComplete?: () => void): VexdElement {
 		return this.animateClass("vex-anim-fade-in", duration, onComplete);
 	}
 
@@ -485,9 +485,9 @@ export class VexElement {
 	 * fades out the element.
 	 * @param {number} duration - Duration in ms.
 	 * @param {() => void} [onComplete] - Callback after animation completes.
-	 * @returns {VexElement} The current VexElement instance.
+	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	fadeOut(duration: number, onComplete?: () => void): VexElement {
+	fadeOut(duration: number, onComplete?: () => void): VexdElement {
 		return this.animateClass("vex-anim-fade-out", duration, onComplete);
 	}
 
@@ -495,9 +495,9 @@ export class VexElement {
 	 * Slides the element in from the left.
 	 * @param {number} duration - Duration in ms.
 	 * @param {() => void} [onComplete] - Callback after animation completes.
-	 * @returns {VexElement} The current VexElement instance.
+	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	slideRight(duration: number, onComplete?: () => void): VexElement {
+	slideRight(duration: number, onComplete?: () => void): VexdElement {
 		return this.animateClass("vex-anim-slide-right", duration, onComplete);
 	}
 
@@ -505,9 +505,9 @@ export class VexElement {
 	 * Slightly moves the element to the left.
 	 * @param {number} duration - Duration in ms.
 	 * @param {() => void} [onComplete] - Callback after animation completes.
-	 * @returns {VexElement} The current VexElement instance.
+	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	slightLeft(duration: number, onComplete?: () => void): VexElement {
+	slightLeft(duration: number, onComplete?: () => void): VexdElement {
 		return this.animateClass("vex-anim-slight-left", duration, onComplete);
 	}
 
@@ -515,9 +515,9 @@ export class VexElement {
 	 * Slightly moves the element down.
 	 * @param {number} duration - Duration in ms.
 	 * @param {() => void} [onComplete] - Callback after animation completes.
-	 * @returns {VexElement} The current VexElement instance.
+	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	slightDown(duration: number, onComplete?: () => void): VexElement {
+	slightDown(duration: number, onComplete?: () => void): VexdElement {
 		return this.animateClass("vex-anim-slight-down", duration, onComplete);
 	}
 
@@ -525,9 +525,9 @@ export class VexElement {
 	 * Slides the element up.
 	 * @param {number} duration - Duration in ms.
 	 * @param {() => void} [onComplete] - Callback after animation completes.
-	 * @returns {VexElement} The current VexElement instance.
+	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	slideUp(duration: number, onComplete?: () => void): VexElement {
+	slideUp(duration: number, onComplete?: () => void): VexdElement {
 		return this.animateClass("vex-anim-slide-up", duration, onComplete);
 	}
 
@@ -535,9 +535,9 @@ export class VexElement {
 	 * rotates the element.
 	 * @param {number} duration - Duration in ms.
 	 * @param {() => void} [onComplete] - Callback after animation completes.
-	 * @returns {VexElement} The current VexElement instance.
+	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	spins(duration: number, onComplete?: () => void): VexElement {
+	spins(duration: number, onComplete?: () => void): VexdElement {
 		return this.animateClass("vex-anim-spins", duration, onComplete);
 	}
 
@@ -545,9 +545,9 @@ export class VexElement {
 	 * Bounces the element.
 	 * @param {number} duration - Duration in ms.
 	 * @param {() => void} [onComplete] - Callback after animation completes.
-	 * @returns {VexElement} The current VexElement instance.
+	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	bounces(duration: number, onComplete?: () => void): VexElement {
+	bounces(duration: number, onComplete?: () => void): VexdElement {
 		return this.animateClass("vex-anim-bounces", duration, onComplete);
 	}
 
@@ -555,9 +555,9 @@ export class VexElement {
 	 * Blinks the element's text.
 	 * @param {number} duration - Duration in ms.
 	 * @param {() => void} [onComplete] - Callback after animation completes.
-	 * @returns {VexElement} The current VexElement instance.
+	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	blinkText(duration: number, onComplete?: () => void): VexElement {
+	blinkText(duration: number, onComplete?: () => void): VexdElement {
 		return this.animateClass("vex-anim-blink-text", duration, onComplete);
 	}
 }
