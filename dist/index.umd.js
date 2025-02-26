@@ -1,16 +1,16 @@
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.Vex = {}));
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.Vexd = {}));
 })(this, (function (exports) { 'use strict';
 
 	/**
-	 * @file VexElement.ts
+	 * @file vexd-element.ts
 	 * @description A lightweight DOM utility class for chainable element manipulation, animations, and reactive signals.
 	 */
-	class VexElement {
+	class VexdElement {
 	    /**
-	     * creates an instance of VexElement.
+	     * creates an instance of VexdElement.
 	     * @param {HTMLElement | string} element - A DOM element or a CSS selector string.
 	     * @throws Will throw an error if the element is not found.
 	     */
@@ -27,9 +27,9 @@
 	        }
 	    }
 	    /**
-	     * returns a new VexElement instance wrapping the first descendant matching the selector.
+	     * returns a new VexdElement instance wrapping the first descendant matching the selector.
 	     * @param {string} selector - CSS selector to search for.
-	     * @returns {VexElement} A new VexElement instance.
+	     * @returns {VexdElement} A new VexdElement instance.
 	     * @throws Will throw an error if no element is found.
 	     */
 	    select(selector) {
@@ -37,7 +37,7 @@
 	        if (!found) {
 	            throw new Error(`VexJS: element not found for selector: ${selector}`);
 	        }
-	        return new VexElement(found);
+	        return new VexdElement(found);
 	    }
 	    id(elementId) {
 	        if (elementId === undefined) {
@@ -46,23 +46,23 @@
 	        return this.select(`#${elementId}`);
 	    }
 	    /**
-	     * Returns an array of VexElement instances for all descendants matching the selector.
+	     * Returns an array of VexdElement instances for all descendants matching the selector.
 	     * @param {string} selector - CSS selector to search for.
-	     * @returns {VexElement[]} Array of VexElement instances.
+	     * @returns {VexdElement[]} Array of VexdElement instances.
 	     */
 	    all(selector) {
 	        const nodeList = this.el.querySelectorAll(selector);
-	        return Array.from(nodeList).map((el) => new VexElement(el));
+	        return Array.from(nodeList).map((el) => new VexdElement(el));
 	    }
 	    /**
 	     * Iterates over each descendant matching the selector, invoking the callback.
 	     * @param {string} selector - CSS selector to search for.
-	     * @param {(VexElement: VexElement, index: number) => void} callback - Function to call for each element.
-	     * @returns {VexElement[]} Array of VexElement instances.
+	     * @param {(VexdElement: VexdElement, index: number) => void} callback - Function to call for each element.
+	     * @returns {VexdElement[]} Array of VexdElement instances.
 	     */
 	    each(selector, callback) {
 	        const elements = this.all(selector);
-	        elements.forEach((VexElement, index) => callback(VexElement, index));
+	        elements.forEach((VexdElement, index) => callback(VexdElement, index));
 	        return elements;
 	    }
 	    html(content) {
@@ -99,7 +99,7 @@
 	     * adds an event listener that is automatically removed after one invocation.
 	     * @param {string} eventName - Event name.
 	     * @param {(e: Event) => void} callback - Callback function.
-	     * @returns {VexElement} The current VexElement instance.
+	     * @returns {VexdElement} The current VexdElement instance.
 	     */
 	    once(eventName, callback) {
 	        this.el.addEventListener(eventName, callback, { once: true });
@@ -109,7 +109,7 @@
 	     * Dispatches a custom event.
 	     * @param {string} eventName - Custom event name.
 	     * @param {{ [key: string]: any }} [details={}] - Event details.
-	     * @returns {VexElement} The current VexElement instance.
+	     * @returns {VexdElement} The current VexdElement instance.
 	     */
 	    emit(eventName, details = {}) {
 	        const event = new CustomEvent(eventName, { detail: details });
@@ -122,7 +122,7 @@
 	    /**
 	     * Adds a class to the element.
 	     * @param {string} className - Class name to add.
-	     * @returns {VexElement} The current VexElement instance.
+	     * @returns {VexdElement} The current VexdElement instance.
 	     */
 	    classed(className) {
 	        this.el.classList.add(className);
@@ -131,7 +131,7 @@
 	    /**
 	     * Removes a class from the element.
 	     * @param {string} className - Class name to remove.
-	     * @returns {VexElement} The current VexElement instance.
+	     * @returns {VexdElement} The current VexdElement instance.
 	     */
 	    declass(className) {
 	        this.el.classList.remove(className);
@@ -140,7 +140,7 @@
 	    /**
 	     * Toggles a class on the element.
 	     * @param {string} className - Class name to toggle.
-	     * @returns {VexElement} The current VexElement instance.
+	     * @returns {VexdElement} The current VexdElement instance.
 	     */
 	    toggleClass(className) {
 	        this.el.classList.toggle(className);
@@ -201,17 +201,17 @@
 	    /**
 	     * Filters descendant elements matching the selector and predicate.
 	     * @param {string} selector - CSS selector.
-	     * @param {(VexElement: VexElement) => boolean} predicate - Predicate function.
-	     * @returns {VexElement[]} Array of VexElement instances that match the predicate.
+	     * @param {(VexdElement: VexdElement) => boolean} predicate - Predicate function.
+	     * @returns {VexdElement[]} Array of VexdElement instances that match the predicate.
 	     */
 	    where(selector, predicate) {
-	        return this.all(selector).filter((VexElement) => predicate(VexElement));
+	        return this.all(selector).filter((VexdElement) => predicate(VexdElement));
 	    }
 	    /**
 	     * filters descendant elements matching the selector that do NOT satisfy the predicate.
 	     * @param {string} selector - CSS selector.
-	     * @param {(VexElement: VexElement) => boolean} predicate - Predicate function.
-	     * @returns {VexElement[]} Array of VexElement instances that do not match the predicate.
+	     * @param {(VexdElement: VexdElement) => boolean} predicate - Predicate function.
+	     * @returns {VexdElement[]} Array of VexdElement instances that do not match the predicate.
 	     */
 	    excluding(selector, predicate) {
 	        return this.all(selector).filter((vEl) => !predicate(vEl));
@@ -219,25 +219,25 @@
 	    /**
 	     * returns the closest ancestor (or self) that matches the selector.
 	     * @param {string} selector - CSS selector.
-	     * @returns {VexElement | null} Closest matching VexElement instance or null.
+	     * @returns {VexdElement | null} Closest matching VexdElement instance or null.
 	     */
 	    closest(selector) {
 	        const found = this.el.closest(selector);
-	        return found ? new VexElement(found) : null;
+	        return found ? new VexdElement(found) : null;
 	    }
 	    /**
-	     * returns the parent element as a VexElement instance.
-	     * @returns {VexElement | null} The parent VexElement instance or null.
+	     * returns the parent element as a VexdElement instance.
+	     * @returns {VexdElement | null} The parent VexdElement instance or null.
 	     */
 	    parent() {
-	        return this.el.parentElement ? new VexElement(this.el.parentElement) : null;
+	        return this.el.parentElement ? new VexdElement(this.el.parentElement) : null;
 	    }
 	    /**
-	     * returns an array of children as VexElement instances.
-	     * @returns {VexElement[]} Array of child VexElement instances.
+	     * returns an array of children as VexdElement instances.
+	     * @returns {VexdElement[]} Array of child VexdElement instances.
 	     */
 	    children() {
-	        return Array.from(this.el.children).map((child) => new VexElement(child));
+	        return Array.from(this.el.children).map((child) => new VexdElement(child));
 	    }
 	    /**
 	     * returns the underlying native HTMLElement.
@@ -290,7 +290,7 @@
 	     * Adds a class to the element for a specified time (ms) or until a promise resolves.
 	     * @param {string} className - Class name to add.
 	     * @param {number | Promise<any>} duration - Duration in ms or a promise.
-	     * @returns {VexElement} The current VexElement instance.
+	     * @returns {VexdElement} The current VexdElement instance.
 	     */
 	    timedClass(className, duration) {
 	        this.classed(className);
@@ -309,9 +309,9 @@
 	     * @private
 	     */
 	    static ensureAnimationsInjected() {
-	        if (VexElement.animationsInjected)
+	        if (VexdElement.animationsInjected)
 	            return;
-	        VexElement.animationsInjected = true;
+	        VexdElement.animationsInjected = true;
 	    }
 	    /**
 	     * helper that applies an animation class with a given duration.
@@ -319,10 +319,10 @@
 	     * @param {string} animationClass - CSS class for the animation.
 	     * @param {number} duration - Duration of the animation in ms.
 	     * @param {() => void} [onComplete] - Optional callback after animation.
-	     * @returns {VexElement} The current VexElement instance.
+	     * @returns {VexdElement} The current VexdElement instance.
 	     */
 	    animateClass(animationClass, duration, onComplete) {
-	        VexElement.ensureAnimationsInjected();
+	        VexdElement.ensureAnimationsInjected();
 	        this.el.style.setProperty("--vex-duration", `${duration}ms`);
 	        this.classed(animationClass);
 	        setTimeout(() => {
@@ -336,7 +336,7 @@
 	     * fades in the element.
 	     * @param {number} duration - Duration in ms.
 	     * @param {() => void} [onComplete] - Callback after animation completes.
-	     * @returns {VexElement} The current VexElement instance.
+	     * @returns {VexdElement} The current VexdElement instance.
 	     */
 	    fadeIn(duration, onComplete) {
 	        return this.animateClass("vex-anim-fade-in", duration, onComplete);
@@ -345,7 +345,7 @@
 	     * fades out the element.
 	     * @param {number} duration - Duration in ms.
 	     * @param {() => void} [onComplete] - Callback after animation completes.
-	     * @returns {VexElement} The current VexElement instance.
+	     * @returns {VexdElement} The current VexdElement instance.
 	     */
 	    fadeOut(duration, onComplete) {
 	        return this.animateClass("vex-anim-fade-out", duration, onComplete);
@@ -354,7 +354,7 @@
 	     * Slides the element in from the left.
 	     * @param {number} duration - Duration in ms.
 	     * @param {() => void} [onComplete] - Callback after animation completes.
-	     * @returns {VexElement} The current VexElement instance.
+	     * @returns {VexdElement} The current VexdElement instance.
 	     */
 	    slideRight(duration, onComplete) {
 	        return this.animateClass("vex-anim-slide-right", duration, onComplete);
@@ -363,7 +363,7 @@
 	     * Slightly moves the element to the left.
 	     * @param {number} duration - Duration in ms.
 	     * @param {() => void} [onComplete] - Callback after animation completes.
-	     * @returns {VexElement} The current VexElement instance.
+	     * @returns {VexdElement} The current VexdElement instance.
 	     */
 	    slightLeft(duration, onComplete) {
 	        return this.animateClass("vex-anim-slight-left", duration, onComplete);
@@ -372,7 +372,7 @@
 	     * Slightly moves the element down.
 	     * @param {number} duration - Duration in ms.
 	     * @param {() => void} [onComplete] - Callback after animation completes.
-	     * @returns {VexElement} The current VexElement instance.
+	     * @returns {VexdElement} The current VexdElement instance.
 	     */
 	    slightDown(duration, onComplete) {
 	        return this.animateClass("vex-anim-slight-down", duration, onComplete);
@@ -381,7 +381,7 @@
 	     * Slides the element up.
 	     * @param {number} duration - Duration in ms.
 	     * @param {() => void} [onComplete] - Callback after animation completes.
-	     * @returns {VexElement} The current VexElement instance.
+	     * @returns {VexdElement} The current VexdElement instance.
 	     */
 	    slideUp(duration, onComplete) {
 	        return this.animateClass("vex-anim-slide-up", duration, onComplete);
@@ -390,7 +390,7 @@
 	     * rotates the element.
 	     * @param {number} duration - Duration in ms.
 	     * @param {() => void} [onComplete] - Callback after animation completes.
-	     * @returns {VexElement} The current VexElement instance.
+	     * @returns {VexdElement} The current VexdElement instance.
 	     */
 	    spins(duration, onComplete) {
 	        return this.animateClass("vex-anim-spins", duration, onComplete);
@@ -399,7 +399,7 @@
 	     * Bounces the element.
 	     * @param {number} duration - Duration in ms.
 	     * @param {() => void} [onComplete] - Callback after animation completes.
-	     * @returns {VexElement} The current VexElement instance.
+	     * @returns {VexdElement} The current VexdElement instance.
 	     */
 	    bounces(duration, onComplete) {
 	        return this.animateClass("vex-anim-bounces", duration, onComplete);
@@ -408,59 +408,59 @@
 	     * Blinks the element's text.
 	     * @param {number} duration - Duration in ms.
 	     * @param {() => void} [onComplete] - Callback after animation completes.
-	     * @returns {VexElement} The current VexElement instance.
+	     * @returns {VexdElement} The current VexdElement instance.
 	     */
 	    blinkText(duration, onComplete) {
 	        return this.animateClass("vex-anim-blink-text", duration, onComplete);
 	    }
 	}
-	VexElement.animationsInjected = false;
+	VexdElement.animationsInjected = false;
 
 	/**
-	 * @file VexDoc.ts
-	 * @description Document-level utilities for working with VexElement.
+	 * @file vex-doc.ts
+	 * @description Document-level utilities for working with VexdElement.
 	 */
-	class vexd {
+	class vexdoc {
 	    /**
-	     * equivalent to document.querySelector, but returns a VexElement instance.
+	     * equivalent to document.querySelector, but returns a VexdElement instance.
 	     * @param {string} selector - CSS selector.
-	     * @returns {VexElement} A VexElement instance wrapping the selected element.
+	     * @returns {VexdElement} A VexdElement instance wrapping the selected element.
 	     * @throws Will throw an error if no element is found.
 	     */
 	    static select(selector) {
 	        const el = document.querySelector(selector);
 	        if (!el)
 	            throw new Error(`Element not found for selector: ${selector}`);
-	        return new VexElement(el);
+	        return new VexdElement(el);
 	    }
 	    /**
-	     * returns a VexElement instance, equivalent to document.getElementById.
+	     * returns a VexdElement instance, equivalent to document.getElementById.
 	     * @param {string} id - The element's id.
-	     * @returns {VexElement} a VexElement instance.
+	     * @returns {VexdElement} a VexdElement instance.
 	     * @throws will throw an error if no element is found.
 	     */
 	    static id(id) {
 	        const el = document.getElementById(id);
 	        if (!el)
 	            throw new Error(`Element not found with id: ${id}`);
-	        return new VexElement(el);
+	        return new VexdElement(el);
 	    }
 	    /**
-	     * equivalent to document.querySelectorAll, but returns an array of VexElement instances.
+	     * equivalent to document.querySelectorAll, but returns an array of VexdElement instances.
 	     * @param {string} selector - CSS selector.
-	     * @param {(vex: VexElement, index: number) => void} callback - Callback for each element.
-	     * @returns {VexElement[]} Array of VexElement instances.
+	     * @param {(vex: VexdElement, index: number) => void} callback - Callback for each element.
+	     * @returns {VexdElement[]} Array of VexdElement instances.
 	     */
 	    static each(selector, callback) {
 	        const nodeList = document.querySelectorAll(selector);
 	        Array.from(nodeList).forEach((el, index) => {
-	            const vex = new VexElement(el);
+	            const vex = new VexdElement(el);
 	            callback(vex, index);
 	        });
 	    }
 	    static all(selector) {
 	        const nodeList = document.querySelectorAll(selector);
-	        return Array.from(nodeList).map((el) => new VexElement(el));
+	        return Array.from(nodeList).map((el) => new VexdElement(el));
 	    }
 	    /**
 	     * executes a callback once the DOM is fully loaded.
@@ -494,19 +494,19 @@
 	    /**
 	     * imports a CSS file into the document by creating a <link> element.
 	     * @param {string} cssPath - Path to the CSS file.
-	     * @returns {VexElement} A VexElement instance wrapping the created <link> element.
+	     * @returns {VexdElement} A VexdElement instance wrapping the created <link> element.
 	     */
 	    static importCSS(cssPath) {
 	        const link = document.createElement("link");
 	        link.rel = "stylesheet";
 	        link.href = cssPath;
 	        document.head.appendChild(link);
-	        return new VexElement(link);
+	        return new VexdElement(link);
 	    }
 	    /**
 	     * removes CSS files that include the given file name.
 	     * @param {string} cssFileName - Partial name of the CSS file.
-	     * @returns {VexElement[]} Array of VexElement instances for the removed elements.
+	     * @returns {VexdElement[]} Array of VexdElement instances for the removed elements.
 	     */
 	    static removeCSS(cssFileName) {
 	        const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
@@ -515,7 +515,7 @@
 	            var _a;
 	            if ((_a = link.getAttribute("href")) === null || _a === void 0 ? void 0 : _a.includes(cssFileName)) {
 	                link.remove();
-	                removed.push(new VexElement(link));
+	                removed.push(new VexdElement(link));
 	            }
 	        });
 	        return removed;
@@ -523,17 +523,17 @@
 	    /**
 	     * creates a new element in the document, returned as a vex element.
 	     * @param {string} elementName - The tag name for the element.
-	     * @returns {VexElement} A VexElement instance wrapping the new element.
+	     * @returns {VexdElement} A VexdElement instance wrapping the new element.
 	     */
 	    static create(elementName) {
 	        const el = document.createElement(elementName);
-	        return new VexElement(el);
+	        return new VexdElement(el);
 	    }
 	    /**
 	     * gets all of the forms in the document with an optional selector to filter them
 	     * by
 	     * @param {string} [optionalSelector] - Optional CSS selector to filter forms.
-	     * @returns {VexElement[]} Array of VexElement instances wrapping form elements.
+	     * @returns {VexdElement[]} Array of VexdElement instances wrapping form elements.
 	     */
 	    static forms(optionalSelector) {
 	        let forms;
@@ -543,25 +543,25 @@
 	        else {
 	            forms = document.getElementsByTagName("form");
 	        }
-	        return Array.from(forms).map((el) => new VexElement(el));
+	        return Array.from(forms).map((el) => new VexdElement(el));
 	    }
 	    /**
 	     * equivalent to document.getElementsByTagName
 	     * @param {string} tagName - The tag name.
-	     * @returns {VexElement[]} Array of VexElement instances.
+	     * @returns {VexdElement[]} Array of VexdElement instances.
 	     */
 	    static tags(tagName) {
 	        const tags = document.getElementsByTagName(tagName);
-	        return Array.from(tags).map((el) => new VexElement(el));
+	        return Array.from(tags).map((el) => new VexdElement(el));
 	    }
 	    /**
 	     * equivalent to document.getElementsByClassName
 	     * @param {string} className - The class name.
-	     * @returns {VexElement[]} Array of VexElement instances.
+	     * @returns {VexdElement[]} Array of VexdElement instances.
 	     */
-	    static classed(className) {
+	    static className(className) {
 	        const elements = document.getElementsByClassName(className);
-	        return Array.from(elements).map((el) => new VexElement(el));
+	        return Array.from(elements).map((el) => new VexdElement(el));
 	    }
 	    /**
 	     * Provides a reactive signal mechanism.
@@ -581,12 +581,13 @@
 	            state = newValue;
 	            subscribers.forEach((cb) => cb(oldValue, newValue));
 	        };
-	        return [subscribe, setState];
+	        const getState = () => state;
+	        return { subscribe, setState, getState };
 	    }
 	}
 
-	exports.VexElement = VexElement;
-	exports.vexd = vexd;
+	exports.VexdElement = VexdElement;
+	exports.vexdoc = vexdoc;
 
 }));
 //# sourceMappingURL=index.umd.js.map
