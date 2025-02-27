@@ -13,6 +13,6 @@
 		"sourceMap": true,
 		"moduleResolution": "node"
 	},
-	"include": ["src/**/*"],
+	"include": ["src/**/*", "dist/vexd-hooks.d.ts"],
 	"exclude": ["node_modules", "**/*.spec.ts"]
 }

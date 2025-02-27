@@ -3,8 +3,8 @@
  * @description Document-level utilities for working with VexdElement.
  */
 import { VexdElement } from "./vexd-element";
-import { VexdState, VexdTimer, VexdInterval } from "./vexd-hooks";
-export declare class vexd {
+import { VexdState, VexdTimer, VexdInterval, EffectStore, VexdSignal } from "./vexd-hooks";
+export declare class Vexd {
     /**
      * equivalent to document.querySelector, but returns a VexdElement instance.
      * @param {string} selector - CSS selector.
@@ -38,23 +38,11 @@ export declare class vexd {
      */
     static title(title: string): void;
     /**
-     * imports a CSS file into the document by creating a <link> element.
-     * @param {string} cssPath - Path to the CSS file.
-     * @returns {VexdElement} A VexdElement instance wrapping the created <link> element.
-     */
-    static importCSS(cssPath: string): VexdElement;
-    /**
-     * removes CSS files that include the given file name.
-     * @param {string} cssFileName - Partial name of the CSS file.
-     * @returns {VexdElement[]} Array of VexdElement instances for the removed elements.
-     */
-    static removeCSS(cssFileName: string): VexdElement[];
-    /**
      * creates a new element in the document, returned as a vex element.
      * @param {string} elementName - The tag name for the element.
      * @returns {VexdElement} A VexdElement instance wrapping the new element.
      */
-    static create(elementName: string): VexdElement;
+    static create(elementName: string, options?: ElementCreationOptions): VexdElement;
     /**
      * gets all of the forms in the document with an optional selector to filter them
      * by
@@ -100,8 +88,27 @@ export declare class vexd {
      * start, stop, and reset methods
      * @param timerFn
      * @param ms
-     * @returns
+     * @returns {VexdTimer}
      */
     static timer(timerFn: () => void, ms?: number): VexdTimer;
+    /**
+     * Creates a VexdInterval that can be used to run the timerFn parameter
+     * every "nth" ms
+     * @param timerFn
+     * @param ms
+     * @returns {VexdInterval}
+     */
     static interval(timerFn: () => void, ms?: number): VexdInterval;
+    /**
+     * creates a basic signal that can be used to trigger updates
+     * the signalSetter function is called to get the current value
+     * when the signal is emitted and all of the subscribers are
+     * called with the new value
+     * @param signalSetter
+     * @param initialValue
+     * @returns
+     */
+    static signal<T>(signalSetter: () => T, initialValue?: T): VexdSignal<T>;
+    static on(event: string, callback: VoidFunction): VoidFunction;
+    static effectStore(): EffectStore;
 }

@@ -39,10 +39,28 @@
 	        }
 	        return new VexdElement(found);
 	    }
+	    /**
+	     * returns a new VexdElement instance wrapping the first descendant matching the class name.
+	     * @param className
+	     * @returns
+	     */
+	    classed(className) {
+	        return this.select(`.${className}`);
+	    }
+	    /**
+	     * gets all descendants matching the class name.
+	     * @param className
+	     * @returns {VexdElement[]}
+	     */
+	    classes(className) {
+	        return this.all(`.${className}`);
+	    }
+	    /**
+	     * returns a new VexdElement instance wrapping the first descendant matching the id.
+	     * @param elementId
+	     * @returns {VexdElement}
+	     */
 	    id(elementId) {
-	        if (elementId === undefined) {
-	            return this.el.id;
-	        }
 	        return this.select(`#${elementId}`);
 	    }
 	    /**
@@ -58,30 +76,23 @@
 	     * Iterates over each descendant matching the selector, invoking the callback.
 	     * @param {string} selector - CSS selector to search for.
 	     * @param {(VexdElement: VexdElement, index: number) => void} callback - Function to call for each element.
-	     * @returns {VexdElement[]} Array of VexdElement instances.
 	     */
 	    each(selector, callback) {
-	        const elements = this.all(selector);
-	        elements.forEach((VexdElement, index) => callback(VexdElement, index));
-	        return elements;
+	        this.all(selector).forEach((VexdElement, index) => callback(VexdElement, index));
 	    }
 	    html(content) {
-	        if (content === undefined) {
+	        if (!content) {
 	            return this.el.innerHTML;
 	        }
-	        else {
-	            this.el.innerHTML = content;
-	            return this;
-	        }
+	        this.el.innerHTML = content;
+	        return this;
 	    }
 	    text(content) {
-	        if (content === undefined) {
+	        if (!content) {
 	            return this.el.textContent || "";
 	        }
-	        else {
-	            this.el.textContent = content;
-	            return this;
-	        }
+	        this.el.textContent = content;
+	        return this;
 	    }
 	    /**
 	     * adds an event listener and returns a cleanup function to remove it.
@@ -116,15 +127,12 @@
 	        this.el.dispatchEvent(event);
 	        return this;
 	    }
-	    // ---------------------
-	    // element class methods
-	    // ---------------------
 	    /**
 	     * Adds a class to the element.
 	     * @param {string} className - Class name to add.
 	     * @returns {VexdElement} The current VexdElement instance.
 	     */
-	    classed(className) {
+	    addClass(className) {
 	        this.el.classList.add(className);
 	        return this;
 	    }
@@ -133,7 +141,7 @@
 	     * @param {string} className - Class name to remove.
 	     * @returns {VexdElement} The current VexdElement instance.
 	     */
-	    declass(className) {
+	    removeClass(className) {
 	        this.el.classList.remove(className);
 	        return this;
 	    }
@@ -295,32 +303,32 @@
 	     * @returns {VexdElement} The current VexdElement instance.
 	     */
 	    timedClass(className, duration) {
-	        this.classed(className);
+	        this.addClass(className);
 	        if (typeof duration === "number") {
 	            setTimeout(() => {
-	                this.declass(className);
+	                this.removeClass(className);
 	            }, duration);
 	        }
 	        else if (duration && typeof duration.then === "function") {
-	            duration.then(() => this.declass(className));
+	            duration.then(() => this.removeClass(className));
 	        }
 	        return this;
 	    }
 	    /**
 	     * equivalent to .appendChild
 	     * @param el
-	     * @returns
+	     * @returns {VexdElement}
 	     */
 	    add(el) {
 	        if (typeof el === "string") {
 	            this.el.insertAdjacentHTML("beforeend", el);
+	            return this;
 	        }
-	        else if (el instanceof VexdElement) {
+	        if (el instanceof VexdElement) {
 	            this.el.appendChild(el.native());
+	            return this;
 	        }
-	        else {
-	            this.el.appendChild(el);
-	        }
+	        this.el.appendChild(el);
 	        return this;
 	    }
 	    /**
@@ -346,7 +354,7 @@
 	     * @param mouseLeave
 	     * @returns {() => void} function to remove the event listeners.
 	     */
-	    hovered(mouseEnter, mouseLeave) {
+	    onHover(mouseEnter, mouseLeave) {
 	        this.el.addEventListener("mouseenter", mouseEnter);
 	        this.el.addEventListener("mouseleave", mouseLeave);
 	        return () => {
@@ -354,11 +362,12 @@
 	            this.el.removeEventListener("mouseleave", mouseLeave);
 	        };
 	    }
-	    clicked(callback) {
-	        if (!callback) {
-	            this.el.click();
-	            return this;
-	        }
+	    /*
+	     * equivalent to addEventListener("click", callback) or el.click()
+	     * @param callback
+	     * @returns {() => void} function to remove the event listener.
+	     */
+	    onClick(callback) {
 	        this.el.addEventListener("click", callback);
 	        return () => this.el.removeEventListener("click", callback);
 	    }
@@ -367,7 +376,7 @@
 	     * @param callback
 	     * @returns {() => void} function to remove the event listener.
 	     */
-	    changed(callback) {
+	    onChange(callback) {
 	        this.el.addEventListener("change", callback);
 	        return () => this.el.removeEventListener("change", callback);
 	    }
@@ -377,17 +386,6 @@
 	        }
 	        this.el.value = value;
 	        return this;
-	    }
-	    /**
-	     * binds the value of an input element to a property of an object and
-	     * adds a change listener to update the property when the value changes.
-	     * @param object
-	     * @param property
-	     * @returns  {() => void} function to remove the change listener.
-	     */
-	    bindValue(object, property) {
-	        this.value(object[property]);
-	        return this.changed(() => (object[property] = this.value()));
 	    }
 	    /**
 	     * sets the element's disabled property.
@@ -403,7 +401,7 @@
 	     * (e.g aria("label", "my label")) -> aria-label="my label"
 	     * @param attribute
 	     * @param value
-	     * @returns
+	     * @returns {VexdElement}
 	     */
 	    aria(attribute, value) {
 	        if (value === undefined) {
@@ -427,13 +425,20 @@
 	        const { top, left } = this.el.getBoundingClientRect();
 	        return { top, left };
 	    }
+	    remove(selector) {
+	        if (!selector) {
+	            this.el.remove();
+	            return;
+	        }
+	        this.all(selector).forEach((el) => el.remove());
+	    }
 	}
 
 	/**
 	 * @file vex-doc.ts
 	 * @description Document-level utilities for working with VexdElement.
 	 */
-	class vexd {
+	class Vexd {
 	    /**
 	     * equivalent to document.querySelector, but returns a VexdElement instance.
 	     * @param {string} selector - CSS selector.
@@ -495,41 +500,12 @@
 	        document.title = title;
 	    }
 	    /**
-	     * imports a CSS file into the document by creating a <link> element.
-	     * @param {string} cssPath - Path to the CSS file.
-	     * @returns {VexdElement} A VexdElement instance wrapping the created <link> element.
-	     */
-	    static importCSS(cssPath) {
-	        const link = document.createElement("link");
-	        link.rel = "stylesheet";
-	        link.href = cssPath;
-	        document.head.appendChild(link);
-	        return new VexdElement(link);
-	    }
-	    /**
-	     * removes CSS files that include the given file name.
-	     * @param {string} cssFileName - Partial name of the CSS file.
-	     * @returns {VexdElement[]} Array of VexdElement instances for the removed elements.
-	     */
-	    static removeCSS(cssFileName) {
-	        const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
-	        const removed = [];
-	        links.forEach((link) => {
-	            var _a;
-	            if ((_a = link.getAttribute("href")) === null || _a === void 0 ? void 0 : _a.includes(cssFileName)) {
-	                link.remove();
-	                removed.push(new VexdElement(link));
-	            }
-	        });
-	        return removed;
-	    }
-	    /**
 	     * creates a new element in the document, returned as a vex element.
 	     * @param {string} elementName - The tag name for the element.
 	     * @returns {VexdElement} A VexdElement instance wrapping the new element.
 	     */
-	    static create(elementName) {
-	        const el = document.createElement(elementName);
+	    static create(elementName, options) {
+	        const el = document.createElement(elementName, options);
 	        return new VexdElement(el);
 	    }
 	    /**
@@ -605,27 +581,29 @@
 	            }
 	            if (typeof newState === "function") {
 	                const result = newState(_state);
-	                if (result !== undefined) {
-	                    _state = result;
-	                }
+	                _state = result;
 	            }
 	            else {
 	                _state = newState;
 	            }
+	            if (!_state)
+	                throw new Error("VexdNullState: State cannot be null or undefined");
 	            _sideEffects.forEach((fn) => fn(_state));
 	            return _state;
 	        };
-	        const effect = (fn) => {
+	        const effect = (fn, triggerNow = true) => {
 	            _sideEffects.push(fn);
+	            if (triggerNow)
+	                fn(_state);
 	        };
-	        return [effect, state];
+	        return { state, effect };
 	    }
 	    /**
 	     * using the timerFn function, a VexdTimer is created with the
 	     * start, stop, and reset methods
 	     * @param timerFn
 	     * @param ms
-	     * @returns
+	     * @returns {VexdTimer}
 	     */
 	    static timer(timerFn, ms = 1000) {
 	        let interval = null;
@@ -647,12 +625,18 @@
 	        };
 	        return { start, stop, reset };
 	    }
+	    /**
+	     * Creates a VexdInterval that can be used to run the timerFn parameter
+	     * every "nth" ms
+	     * @param timerFn
+	     * @param ms
+	     * @returns {VexdInterval}
+	     */
 	    static interval(timerFn, ms = 1000) {
 	        let interval = null;
 	        const start = () => {
-	            if (interval) {
+	            if (interval)
 	                stop();
-	            }
 	            interval = setInterval(timerFn, ms);
 	        };
 	        const stop = () => {
@@ -667,10 +651,50 @@
 	        };
 	        return { start, stop, reset };
 	    }
+	    /**
+	     * creates a basic signal that can be used to trigger updates
+	     * the signalSetter function is called to get the current value
+	     * when the signal is emitted and all of the subscribers are
+	     * called with the new value
+	     * @param signalSetter
+	     * @param initialValue
+	     * @returns
+	     */
+	    static signal(signalSetter, initialValue) {
+	        let subscribers = [];
+	        const subscribe = (callback) => {
+	            subscribers.push(callback);
+	        };
+	        const broadcast = (value) => {
+	            signalSetter();
+	            subscribers.forEach((callback) => callback(value));
+	        };
+	        return [subscribe, broadcast];
+	    }
+	    static on(event, callback) {
+	        document.addEventListener(event, callback);
+	        return () => document.removeEventListener(event, callback);
+	    }
+	    static effectStore() {
+	        const effects = [];
+	        const addEffect = (effect) => {
+	            effects.push(effect);
+	            return () => {
+	                const index = effects.indexOf(effect);
+	                if (index > -1)
+	                    effects.splice(index, 1);
+	            };
+	        };
+	        const dispose = () => {
+	            effects.forEach((effect) => effect());
+	            effects.length = 0;
+	        };
+	        return [addEffect, dispose];
+	    }
 	}
 
+	exports.Vexd = Vexd;
 	exports.VexdElement = VexdElement;
-	exports.vexd = vexd;
 
 }));
 //# sourceMappingURL=index.umd.js.map

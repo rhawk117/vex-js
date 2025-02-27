@@ -4,9 +4,16 @@
  */
 
 import { VexdElement } from "./vexd-element";
-import { VexdState, StateHook, VexdTimer, VexdInterval } from "./vexd-hooks";
+import {
+	VexdState,
+	VexdTimer,
+	VexdInterval,
+	EffectStore,
+	OptionalFunctionOrValue,
+	VexdSignal,
+} from "../dist/vexd-hooks";
 
-export class vexd {
+export class Vexd {
 	/**
 	 * equivalent to document.querySelector, but returns a VexdElement instance.
 	 * @param {string} selector - CSS selector.
@@ -74,44 +81,15 @@ export class vexd {
 	}
 
 	/**
-	 * imports a CSS file into the document by creating a <link> element.
-	 * @param {string} cssPath - Path to the CSS file.
-	 * @returns {VexdElement} A VexdElement instance wrapping the created <link> element.
-	 */
-	static importCSS(cssPath: string): VexdElement {
-		const link = document.createElement("link");
-		link.rel = "stylesheet";
-		link.href = cssPath;
-		document.head.appendChild(link);
-		return new VexdElement(link as HTMLElement);
-	}
-
-	/**
-	 * removes CSS files that include the given file name.
-	 * @param {string} cssFileName - Partial name of the CSS file.
-	 * @returns {VexdElement[]} Array of VexdElement instances for the removed elements.
-	 */
-	static removeCSS(cssFileName: string): VexdElement[] {
-		const links = Array.from(
-			document.querySelectorAll('link[rel="stylesheet"]')
-		);
-		const removed: VexdElement[] = [];
-		links.forEach((link) => {
-			if (link.getAttribute("href")?.includes(cssFileName)) {
-				link.remove();
-				removed.push(new VexdElement(link as HTMLElement));
-			}
-		});
-		return removed;
-	}
-
-	/**
 	 * creates a new element in the document, returned as a vex element.
 	 * @param {string} elementName - The tag name for the element.
 	 * @returns {VexdElement} A VexdElement instance wrapping the new element.
 	 */
-	static create(elementName: string): VexdElement {
-		const el = document.createElement(elementName);
+	static create(
+		elementName: string,
+		options?: ElementCreationOptions
+	): VexdElement {
+		const el = document.createElement(elementName, options);
 		return new VexdElement(el);
 	}
 
@@ -189,28 +167,27 @@ export class vexd {
 	static state<T>(initialState: T): VexdState<T> {
 		let _state = initialState;
 		let _sideEffects: ((newState: T) => void)[] = [];
-
-		const state = (newState: StateHook<T>): T => {
+		const state = (newState?: OptionalFunctionOrValue): T => {
 			if (!newState) {
 				return _state;
 			}
 			if (typeof newState === "function") {
 				const result = (newState as Function)(_state);
-				if (result !== undefined) {
-					_state = result;
-				}
+				_state = result;
 			} else {
 				_state = newState;
 			}
+			if (!_state)
+				throw new Error("VexdNullState: State cannot be null or undefined");
 			_sideEffects.forEach((fn) => fn(_state));
 			return _state;
 		};
-
-		const effect = (fn: (newState: T) => void) => {
+		const effect = (fn: (newState: T) => void, triggerNow = true) => {
 			_sideEffects.push(fn);
+			if (triggerNow) fn(_state);
 		};
 
-		return [effect, state];
+		return { state, effect };
 	}
 
 	/**
@@ -218,7 +195,7 @@ export class vexd {
 	 * start, stop, and reset methods
 	 * @param timerFn
 	 * @param ms
-	 * @returns
+	 * @returns {VexdTimer}
 	 */
 	static timer(timerFn: () => void, ms: number = 1000): VexdTimer {
 		let interval: number | null = null;
@@ -244,27 +221,74 @@ export class vexd {
 		return { start, stop, reset };
 	}
 
+	/**
+	 * Creates a VexdInterval that can be used to run the timerFn parameter
+	 * every "nth" ms
+	 * @param timerFn
+	 * @param ms
+	 * @returns {VexdInterval}
+	 */
 	static interval(timerFn: () => void, ms: number = 1000): VexdInterval {
 		let interval: number | null = null;
-
 		const start = () => {
-			if (interval) {
-				stop();
-			}
+			if (interval) stop();
 			interval = setInterval(timerFn, ms);
 		};
-
 		const stop = () => {
 			if (!interval) return;
 			clearInterval(interval);
 			interval = null;
 		};
-
 		const reset = () => {
 			stop();
 			start();
 		};
 
 		return { start, stop, reset };
+	}
+
+	/**
+	 * creates a basic signal that can be used to trigger updates
+	 * the signalSetter function is called to get the current value
+	 * when the signal is emitted and all of the subscribers are
+	 * called with the new value
+	 * @param signalSetter
+	 * @param initialValue
+	 * @returns
+	 */
+	static signal<T>(signalSetter: () => T, initialValue?: T): VexdSignal<T> {
+		let signalValue = initialValue;
+		let subscribers: ((value: T) => void)[] = [];
+		const subscribe = (callback: (value: T) => void) => {
+			subscribers.push(callback);
+		};
+		const broadcast = (value: T) => {
+			signalValue = signalSetter();
+			subscribers.forEach((callback) => callback(value));
+		};
+		return [subscribe, broadcast];
+	}
+
+	static on(event: string, callback: VoidFunction): VoidFunction {
+		document.addEventListener(event, callback);
+		return () => document.removeEventListener(event, callback);
+	}
+
+	static effectStore(): EffectStore {
+		const effects: (() => void)[] = [];
+		const addEffect = (effect: () => void) => {
+			effects.push(effect);
+			return () => {
+				const index = effects.indexOf(effect);
+				if (index > -1) effects.splice(index, 1);
+			};
+		};
+
+		const dispose = () => {
+			effects.forEach((effect) => effect());
+			effects.length = 0;
+		};
+
+		return [addEffect, dispose] as const;
 	}
 }

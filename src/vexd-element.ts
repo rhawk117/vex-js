@@ -38,21 +38,29 @@ export class VexdElement {
 	}
 
 	/**
-	 * Gets the element's id.
-	 * @overload
-	 * @returns {string} The element's id.
+	 * returns a new VexdElement instance wrapping the first descendant matching the class name.
+	 * @param className
+	 * @returns
 	 */
-	id(): string;
+	classed(className: string) {
+		return this.select(`.${className}`);
+	}
+
 	/**
-	 * Selects an element by id.
-	 * @param elementId {string}
-	 * @returns {VexdElement} A new VexdElement instance.
+	 * gets all descendants matching the class name.
+	 * @param className
+	 * @returns {VexdElement[]}
 	 */
-	id(elementId: string): VexdElement;
-	id(elementId?: string): string | VexdElement {
-		if (elementId === undefined) {
-			return this.el.id;
-		}
+	classes(className: string): VexdElement[] {
+		return this.all(`.${className}`);
+	}
+
+	/**
+	 * returns a new VexdElement instance wrapping the first descendant matching the id.
+	 * @param elementId
+	 * @returns {VexdElement}
+	 */
+	id(elementId: string): VexdElement {
 		return this.select(`#${elementId}`);
 	}
 
@@ -70,15 +78,14 @@ export class VexdElement {
 	 * Iterates over each descendant matching the selector, invoking the callback.
 	 * @param {string} selector - CSS selector to search for.
 	 * @param {(VexdElement: VexdElement, index: number) => void} callback - Function to call for each element.
-	 * @returns {VexdElement[]} Array of VexdElement instances.
 	 */
 	each(
 		selector: string,
 		callback: (VexdElement: VexdElement, index: number) => void
-	): VexdElement[] {
-		const elements = this.all(selector);
-		elements.forEach((VexdElement, index) => callback(VexdElement, index));
-		return elements;
+	): void {
+		this.all(selector).forEach((VexdElement, index) =>
+			callback(VexdElement, index)
+		);
 	}
 
 	/**
@@ -94,12 +101,11 @@ export class VexdElement {
 	 */
 	html(content: string): VexdElement;
 	html(content?: string): string | VexdElement {
-		if (content === undefined) {
+		if (!content) {
 			return this.el.innerHTML;
-		} else {
-			this.el.innerHTML = content;
-			return this;
 		}
+		this.el.innerHTML = content;
+		return this;
 	}
 
 	/**
@@ -115,12 +121,11 @@ export class VexdElement {
 	 */
 	text(content: string): VexdElement;
 	text(content?: string): string | VexdElement {
-		if (content === undefined) {
+		if (!content) {
 			return this.el.textContent || "";
-		} else {
-			this.el.textContent = content;
-			return this;
 		}
+		this.el.textContent = content;
+		return this;
 	}
 
 	/**
@@ -159,16 +164,12 @@ export class VexdElement {
 		return this;
 	}
 
-	// ---------------------
-	// element class methods
-	// ---------------------
-
 	/**
 	 * Adds a class to the element.
 	 * @param {string} className - Class name to add.
 	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	classed(className: string): VexdElement {
+	addClass(className: string): VexdElement {
 		this.el.classList.add(className);
 		return this;
 	}
@@ -178,7 +179,7 @@ export class VexdElement {
 	 * @param {string} className - Class name to remove.
 	 * @returns {VexdElement} The current VexdElement instance.
 	 */
-	declass(className: string): VexdElement {
+	removeClass(className: string): VexdElement {
 		this.el.classList.remove(className);
 		return this;
 	}
@@ -427,13 +428,13 @@ export class VexdElement {
 	 * @returns {VexdElement} The current VexdElement instance.
 	 */
 	timedClass(className: string, duration: number | Promise<any>): VexdElement {
-		this.classed(className);
+		this.addClass(className);
 		if (typeof duration === "number") {
 			setTimeout(() => {
-				this.declass(className);
+				this.removeClass(className);
 			}, duration);
 		} else if (duration && typeof duration.then === "function") {
-			duration.then(() => this.declass(className));
+			duration.then(() => this.removeClass(className));
 		}
 		return this;
 	}
@@ -441,16 +442,18 @@ export class VexdElement {
 	/**
 	 * equivalent to .appendChild
 	 * @param el
-	 * @returns
+	 * @returns {VexdElement}
 	 */
 	add(el: HTMLElement | string | VexdElement): VexdElement {
 		if (typeof el === "string") {
 			this.el.insertAdjacentHTML("beforeend", el);
-		} else if (el instanceof VexdElement) {
-			this.el.appendChild(el.native());
-		} else {
-			this.el.appendChild(el);
+			return this;
 		}
+		if (el instanceof VexdElement) {
+			this.el.appendChild(el.native());
+			return this;
+		}
+		this.el.appendChild(el);
 		return this;
 	}
 
@@ -479,10 +482,10 @@ export class VexdElement {
 	 * @param mouseLeave
 	 * @returns {() => void} function to remove the event listeners.
 	 */
-	hovered(
+	onHover(
 		mouseEnter: (e: Event) => void,
 		mouseLeave: (e: Event) => void
-	): () => void {
+	): VoidFunction {
 		this.el.addEventListener("mouseenter", mouseEnter);
 		this.el.addEventListener("mouseleave", mouseLeave);
 		return () => {
@@ -491,24 +494,12 @@ export class VexdElement {
 		};
 	}
 
-	/**
-	 * triggers a click event on the element.
-	 * @overload
-	 * @returns {VexdElement} The current VexdElement instance.
-	 */
-	clicked(): VexdElement;
-
 	/*
 	 * equivalent to addEventListener("click", callback) or el.click()
 	 * @param callback
 	 * @returns {() => void} function to remove the event listener.
 	 */
-	clicked(callback: (e: Event) => void): () => void;
-	clicked(callback?: (e: Event) => void): (() => void) | VexdElement {
-		if (!callback) {
-			this.el.click();
-			return this;
-		}
+	onClick(callback: (e: Event) => void): VoidFunction {
 		this.el.addEventListener("click", callback);
 		return () => this.el.removeEventListener("click", callback);
 	}
@@ -518,7 +509,7 @@ export class VexdElement {
 	 * @param callback
 	 * @returns {() => void} function to remove the event listener.
 	 */
-	changed(callback: (e: Event) => void): () => void {
+	onChange(callback: (e: Event) => void): VoidFunction {
 		this.el.addEventListener("change", callback);
 		return () => this.el.removeEventListener("change", callback);
 	}
@@ -544,18 +535,6 @@ export class VexdElement {
 	}
 
 	/**
-	 * binds the value of an input element to a property of an object and
-	 * adds a change listener to update the property when the value changes.
-	 * @param object
-	 * @param property
-	 * @returns  {() => void} function to remove the change listener.
-	 */
-	bindValue<T>(object: T, property: keyof T): () => void {
-		this.value((object as any)[property]);
-		return this.changed(() => ((object as any)[property] = this.value()));
-	}
-
-	/**
 	 * sets the element's disabled property.
 	 * @param predicate
 	 * @returns {VexdElement}
@@ -566,11 +545,17 @@ export class VexdElement {
 	}
 
 	/**
+	 * returns the element's aria attribute.
+	 * @overload
+	 * @param attribute
+	 */
+	aria(attribute: string): string;
+	/**
 	 * sets the element's aria attribute.
 	 * (e.g aria("label", "my label")) -> aria-label="my label"
 	 * @param attribute
 	 * @param value
-	 * @returns
+	 * @returns {VexdElement}
 	 */
 	aria(attribute: string, value?: string): string | VexdElement {
 		if (value === undefined) {
@@ -595,5 +580,24 @@ export class VexdElement {
 	offset(): { top: number; left: number } {
 		const { top, left } = this.el.getBoundingClientRect();
 		return { top, left };
+	}
+
+	/**
+	 * removes the element from the DOM.
+	 * @overload
+	 * @returns {void}
+	 */
+	remove(): void;
+	/**
+	 * removes all descendants matching the selector.
+	 * @param selector
+	 */
+	remove(selector: string): void;
+	remove(selector?: string) {
+		if (!selector) {
+			this.el.remove();
+			return;
+		}
+		this.all(selector).forEach((el) => el.remove());
 	}
 }
