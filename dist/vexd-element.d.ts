@@ -259,23 +259,30 @@ export declare class VexdElement {
      */
     hovered(mouseEnter: (e: Event) => void, mouseLeave: (e: Event) => void): () => void;
     /**
-     * equivalent to addEventListener("click", callback) or el.click()
-     * @param callback
-     * @returns {() => void} function to remove the event listener.
+     * triggers a click event on the element.
+     * @overload
+     * @returns {VexdElement} The current VexdElement instance.
      */
-    clicked(callback?: (e: Event) => void): (() => void) | VexdElement;
+    clicked(): VexdElement;
+    clicked(callback: (e: Event) => void): () => void;
     /**
      * equivalent to addEventListener("change", callback)
      * @param callback
-     * @returns
+     * @returns {() => void} function to remove the event listener.
      */
     changed(callback: (e: Event) => void): () => void;
     /**
      * gets or sets the value of an input element.
-     * @param value
-     * @returns {string | VexdElement}
+     * @overload
+     * @returns {string} The value of the input element
      */
-    value(value?: string): string | VexdElement;
+    value(): string;
+    /**
+     * sets the value of an input element and returns the instance.
+     * @param {string} value - New value.
+     * @returns {VexdElement} The current VexdElement instance.
+     */
+    value(value: string): VexdElement;
     /**
      * binds the value of an input element to a property of an object and
      * adds a change listener to update the property when the value changes.

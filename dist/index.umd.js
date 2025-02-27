@@ -354,11 +354,6 @@
 	            this.el.removeEventListener("mouseleave", mouseLeave);
 	        };
 	    }
-	    /**
-	     * equivalent to addEventListener("click", callback) or el.click()
-	     * @param callback
-	     * @returns {() => void} function to remove the event listener.
-	     */
 	    clicked(callback) {
 	        if (!callback) {
 	            this.el.click();
@@ -370,17 +365,12 @@
 	    /**
 	     * equivalent to addEventListener("change", callback)
 	     * @param callback
-	     * @returns
+	     * @returns {() => void} function to remove the event listener.
 	     */
 	    changed(callback) {
 	        this.el.addEventListener("change", callback);
 	        return () => this.el.removeEventListener("change", callback);
 	    }
-	    /**
-	     * gets or sets the value of an input element.
-	     * @param value
-	     * @returns {string | VexdElement}
-	     */
 	    value(value) {
 	        if (value === undefined) {
 	            return this.el.value;

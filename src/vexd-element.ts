@@ -492,10 +492,18 @@ export class VexdElement {
 	}
 
 	/**
+	 * triggers a click event on the element.
+	 * @overload
+	 * @returns {VexdElement} The current VexdElement instance.
+	 */
+	clicked(): VexdElement;
+
+	/*
 	 * equivalent to addEventListener("click", callback) or el.click()
 	 * @param callback
 	 * @returns {() => void} function to remove the event listener.
 	 */
+	clicked(callback: (e: Event) => void): () => void;
 	clicked(callback?: (e: Event) => void): (() => void) | VexdElement {
 		if (!callback) {
 			this.el.click();
@@ -508,7 +516,7 @@ export class VexdElement {
 	/**
 	 * equivalent to addEventListener("change", callback)
 	 * @param callback
-	 * @returns
+	 * @returns {() => void} function to remove the event listener.
 	 */
 	changed(callback: (e: Event) => void): () => void {
 		this.el.addEventListener("change", callback);
@@ -517,9 +525,16 @@ export class VexdElement {
 
 	/**
 	 * gets or sets the value of an input element.
-	 * @param value
-	 * @returns {string | VexdElement}
+	 * @overload
+	 * @returns {string} The value of the input element
 	 */
+	value(): string;
+	/**
+	 * sets the value of an input element and returns the instance.
+	 * @param {string} value - New value.
+	 * @returns {VexdElement} The current VexdElement instance.
+	 */
+	value(value: string): VexdElement;
 	value(value?: string): string | VexdElement {
 		if (value === undefined) {
 			return (this.el as HTMLInputElement).value;
