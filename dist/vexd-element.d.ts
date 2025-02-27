@@ -4,7 +4,6 @@
  */
 export declare class VexdElement {
     private el;
-    private static animationsInjected;
     /**
      * creates an instance of VexdElement.
      * @param {HTMLElement | string} element - A DOM element or a CSS selector string.
@@ -214,7 +213,7 @@ export declare class VexdElement {
      */
     native(): HTMLElement;
     /**
-     * Observes attribute changes on the element.
+     * uses the MutationObserver API to observe changes to a specific attribute.
      * @param {string} attribute - Attribute name to observe.
      * @param {(oldValue: string | null, newValue: string | null) => void} callback - Callback when attribute changes.
      * @returns {() => void} Function to disconnect the observer.
@@ -236,80 +235,80 @@ export declare class VexdElement {
      */
     timedClass(className: string, duration: number | Promise<any>): VexdElement;
     /**
-     * injects animation CSS if not already injected.
-     * @private
+     * equivalent to .appendChild
+     * @param el
+     * @returns
      */
-    private static ensureAnimationsInjected;
+    add(el: HTMLElement | string | VexdElement): VexdElement;
     /**
-     * helper that applies an animation class with a given duration.
-     * @private
-     * @param {string} animationClass - CSS class for the animation.
-     * @param {number} duration - Duration of the animation in ms.
-     * @param {() => void} [onComplete] - Optional callback after animation.
-     * @returns {VexdElement} The current VexdElement instance.
+     * equivalent to .innerHTML = ""
+     * @returns VexdElement
      */
-    private animateClass;
+    empty(): VexdElement;
     /**
-     * fades in the element.
-     * @param {number} duration - Duration in ms.
-     * @param {() => void} [onComplete] - Callback after animation completes.
-     * @returns {VexdElement} The current VexdElement instance.
+     * adds the CSS declaration to the element's style.
+     * @param cssDeclaration
+     * @returns
      */
-    fadeIn(duration: number, onComplete?: () => void): VexdElement;
+    css(cssDeclaration: Partial<CSSStyleDeclaration>): VexdElement;
     /**
-     * fades out the element.
-     * @param {number} duration - Duration in ms.
-     * @param {() => void} [onComplete] - Callback after animation completes.
-     * @returns {VexdElement} The current VexdElement instance.
+     * defines a mouseenter and mouseleave event.
+     * @param mouseEnter
+     * @param mouseLeave
+     * @returns {() => void} function to remove the event listeners.
      */
-    fadeOut(duration: number, onComplete?: () => void): VexdElement;
+    hovered(mouseEnter: (e: Event) => void, mouseLeave: (e: Event) => void): () => void;
     /**
-     * Slides the element in from the left.
-     * @param {number} duration - Duration in ms.
-     * @param {() => void} [onComplete] - Callback after animation completes.
-     * @returns {VexdElement} The current VexdElement instance.
+     * equivalent to addEventListener("click", callback) or el.click()
+     * @param callback
+     * @returns {() => void} function to remove the event listener.
      */
-    slideRight(duration: number, onComplete?: () => void): VexdElement;
+    clicked(callback?: (e: Event) => void): (() => void) | VexdElement;
     /**
-     * Slightly moves the element to the left.
-     * @param {number} duration - Duration in ms.
-     * @param {() => void} [onComplete] - Callback after animation completes.
-     * @returns {VexdElement} The current VexdElement instance.
+     * equivalent to addEventListener("change", callback)
+     * @param callback
+     * @returns
      */
-    slightLeft(duration: number, onComplete?: () => void): VexdElement;
+    changed(callback: (e: Event) => void): () => void;
     /**
-     * Slightly moves the element down.
-     * @param {number} duration - Duration in ms.
-     * @param {() => void} [onComplete] - Callback after animation completes.
-     * @returns {VexdElement} The current VexdElement instance.
+     * gets or sets the value of an input element.
+     * @param value
+     * @returns {string | VexdElement}
      */
-    slightDown(duration: number, onComplete?: () => void): VexdElement;
+    value(value?: string): string | VexdElement;
     /**
-     * Slides the element up.
-     * @param {number} duration - Duration in ms.
-     * @param {() => void} [onComplete] - Callback after animation completes.
-     * @returns {VexdElement} The current VexdElement instance.
+     * binds the value of an input element to a property of an object and
+     * adds a change listener to update the property when the value changes.
+     * @param object
+     * @param property
+     * @returns  {() => void} function to remove the change listener.
      */
-    slideUp(duration: number, onComplete?: () => void): VexdElement;
+    bindValue<T>(object: T, property: keyof T): () => void;
     /**
-     * rotates the element.
-     * @param {number} duration - Duration in ms.
-     * @param {() => void} [onComplete] - Callback after animation completes.
-     * @returns {VexdElement} The current VexdElement instance.
+     * sets the element's disabled property.
+     * @param predicate
+     * @returns {VexdElement}
      */
-    spins(duration: number, onComplete?: () => void): VexdElement;
+    disable(predicate?: boolean): VexdElement;
     /**
-     * Bounces the element.
-     * @param {number} duration - Duration in ms.
-     * @param {() => void} [onComplete] - Callback after animation completes.
-     * @returns {VexdElement} The current VexdElement instance.
+     * sets the element's aria attribute.
+     * (e.g aria("label", "my label")) -> aria-label="my label"
+     * @param attribute
+     * @param value
+     * @returns
      */
-    bounces(duration: number, onComplete?: () => void): VexdElement;
+    aria(attribute: string, value?: string): string | VexdElement;
     /**
-     * Blinks the element's text.
-     * @param {number} duration - Duration in ms.
-     * @param {() => void} [onComplete] - Callback after animation completes.
-     * @returns {VexdElement} The current VexdElement instance.
+     * returns the element's position and size.
+     * @returns {DOMRect}
      */
-    blinkText(duration: number, onComplete?: () => void): VexdElement;
+    position(): DOMRect;
+    /**
+     * returns the element's offset position.
+     * @returns {top: number, left: number}
+     */
+    offset(): {
+        top: number;
+        left: number;
+    };
 }

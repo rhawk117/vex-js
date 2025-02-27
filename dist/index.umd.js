@@ -230,7 +230,9 @@
 	     * @returns {VexdElement | null} The parent VexdElement instance or null.
 	     */
 	    parent() {
-	        return this.el.parentElement ? new VexdElement(this.el.parentElement) : null;
+	        return this.el.parentElement
+	            ? new VexdElement(this.el.parentElement)
+	            : null;
 	    }
 	    /**
 	     * returns an array of children as VexdElement instances.
@@ -247,7 +249,7 @@
 	        return this.el;
 	    }
 	    /**
-	     * Observes attribute changes on the element.
+	     * uses the MutationObserver API to observe changes to a specific attribute.
 	     * @param {string} attribute - Attribute name to observe.
 	     * @param {(oldValue: string | null, newValue: string | null) => void} callback - Callback when attribute changes.
 	     * @returns {() => void} Function to disconnect the observer.
@@ -305,122 +307,143 @@
 	        return this;
 	    }
 	    /**
-	     * injects animation CSS if not already injected.
-	     * @private
+	     * equivalent to .appendChild
+	     * @param el
+	     * @returns
 	     */
-	    static ensureAnimationsInjected() {
-	        if (VexdElement.animationsInjected)
-	            return;
-	        VexdElement.animationsInjected = true;
-	    }
-	    /**
-	     * helper that applies an animation class with a given duration.
-	     * @private
-	     * @param {string} animationClass - CSS class for the animation.
-	     * @param {number} duration - Duration of the animation in ms.
-	     * @param {() => void} [onComplete] - Optional callback after animation.
-	     * @returns {VexdElement} The current VexdElement instance.
-	     */
-	    animateClass(animationClass, duration, onComplete) {
-	        VexdElement.ensureAnimationsInjected();
-	        this.el.style.setProperty("--vex-duration", `${duration}ms`);
-	        this.classed(animationClass);
-	        setTimeout(() => {
-	            this.declass(animationClass);
-	            if (onComplete)
-	                onComplete();
-	        }, duration);
+	    add(el) {
+	        if (typeof el === "string") {
+	            this.el.insertAdjacentHTML("beforeend", el);
+	        }
+	        else if (el instanceof VexdElement) {
+	            this.el.appendChild(el.native());
+	        }
+	        else {
+	            this.el.appendChild(el);
+	        }
 	        return this;
 	    }
 	    /**
-	     * fades in the element.
-	     * @param {number} duration - Duration in ms.
-	     * @param {() => void} [onComplete] - Callback after animation completes.
-	     * @returns {VexdElement} The current VexdElement instance.
+	     * equivalent to .innerHTML = ""
+	     * @returns VexdElement
 	     */
-	    fadeIn(duration, onComplete) {
-	        return this.animateClass("vex-anim-fade-in", duration, onComplete);
+	    empty() {
+	        this.el.innerHTML = "";
+	        return this;
 	    }
 	    /**
-	     * fades out the element.
-	     * @param {number} duration - Duration in ms.
-	     * @param {() => void} [onComplete] - Callback after animation completes.
-	     * @returns {VexdElement} The current VexdElement instance.
+	     * adds the CSS declaration to the element's style.
+	     * @param cssDeclaration
+	     * @returns
 	     */
-	    fadeOut(duration, onComplete) {
-	        return this.animateClass("vex-anim-fade-out", duration, onComplete);
+	    css(cssDeclaration) {
+	        Object.assign(this.el.style, cssDeclaration);
+	        return this;
 	    }
 	    /**
-	     * Slides the element in from the left.
-	     * @param {number} duration - Duration in ms.
-	     * @param {() => void} [onComplete] - Callback after animation completes.
-	     * @returns {VexdElement} The current VexdElement instance.
+	     * defines a mouseenter and mouseleave event.
+	     * @param mouseEnter
+	     * @param mouseLeave
+	     * @returns {() => void} function to remove the event listeners.
 	     */
-	    slideRight(duration, onComplete) {
-	        return this.animateClass("vex-anim-slide-right", duration, onComplete);
+	    hovered(mouseEnter, mouseLeave) {
+	        this.el.addEventListener("mouseenter", mouseEnter);
+	        this.el.addEventListener("mouseleave", mouseLeave);
+	        return () => {
+	            this.el.removeEventListener("mouseenter", mouseEnter);
+	            this.el.removeEventListener("mouseleave", mouseLeave);
+	        };
 	    }
 	    /**
-	     * Slightly moves the element to the left.
-	     * @param {number} duration - Duration in ms.
-	     * @param {() => void} [onComplete] - Callback after animation completes.
-	     * @returns {VexdElement} The current VexdElement instance.
+	     * equivalent to addEventListener("click", callback) or el.click()
+	     * @param callback
+	     * @returns {() => void} function to remove the event listener.
 	     */
-	    slightLeft(duration, onComplete) {
-	        return this.animateClass("vex-anim-slight-left", duration, onComplete);
+	    clicked(callback) {
+	        if (!callback) {
+	            this.el.click();
+	            return this;
+	        }
+	        this.el.addEventListener("click", callback);
+	        return () => this.el.removeEventListener("click", callback);
 	    }
 	    /**
-	     * Slightly moves the element down.
-	     * @param {number} duration - Duration in ms.
-	     * @param {() => void} [onComplete] - Callback after animation completes.
-	     * @returns {VexdElement} The current VexdElement instance.
+	     * equivalent to addEventListener("change", callback)
+	     * @param callback
+	     * @returns
 	     */
-	    slightDown(duration, onComplete) {
-	        return this.animateClass("vex-anim-slight-down", duration, onComplete);
+	    changed(callback) {
+	        this.el.addEventListener("change", callback);
+	        return () => this.el.removeEventListener("change", callback);
 	    }
 	    /**
-	     * Slides the element up.
-	     * @param {number} duration - Duration in ms.
-	     * @param {() => void} [onComplete] - Callback after animation completes.
-	     * @returns {VexdElement} The current VexdElement instance.
+	     * gets or sets the value of an input element.
+	     * @param value
+	     * @returns {string | VexdElement}
 	     */
-	    slideUp(duration, onComplete) {
-	        return this.animateClass("vex-anim-slide-up", duration, onComplete);
+	    value(value) {
+	        if (value === undefined) {
+	            return this.el.value;
+	        }
+	        this.el.value = value;
+	        return this;
 	    }
 	    /**
-	     * rotates the element.
-	     * @param {number} duration - Duration in ms.
-	     * @param {() => void} [onComplete] - Callback after animation completes.
-	     * @returns {VexdElement} The current VexdElement instance.
+	     * binds the value of an input element to a property of an object and
+	     * adds a change listener to update the property when the value changes.
+	     * @param object
+	     * @param property
+	     * @returns  {() => void} function to remove the change listener.
 	     */
-	    spins(duration, onComplete) {
-	        return this.animateClass("vex-anim-spins", duration, onComplete);
+	    bindValue(object, property) {
+	        this.value(object[property]);
+	        return this.changed(() => (object[property] = this.value()));
 	    }
 	    /**
-	     * Bounces the element.
-	     * @param {number} duration - Duration in ms.
-	     * @param {() => void} [onComplete] - Callback after animation completes.
-	     * @returns {VexdElement} The current VexdElement instance.
+	     * sets the element's disabled property.
+	     * @param predicate
+	     * @returns {VexdElement}
 	     */
-	    bounces(duration, onComplete) {
-	        return this.animateClass("vex-anim-bounces", duration, onComplete);
+	    disable(predicate) {
+	        this.prop("disabled", !!predicate);
+	        return this;
 	    }
 	    /**
-	     * Blinks the element's text.
-	     * @param {number} duration - Duration in ms.
-	     * @param {() => void} [onComplete] - Callback after animation completes.
-	     * @returns {VexdElement} The current VexdElement instance.
+	     * sets the element's aria attribute.
+	     * (e.g aria("label", "my label")) -> aria-label="my label"
+	     * @param attribute
+	     * @param value
+	     * @returns
 	     */
-	    blinkText(duration, onComplete) {
-	        return this.animateClass("vex-anim-blink-text", duration, onComplete);
+	    aria(attribute, value) {
+	        if (value === undefined) {
+	            return this.el.getAttribute(`aria-${attribute}`) || "";
+	        }
+	        this.el.setAttribute(`aria-${attribute}`, value);
+	        return this;
+	    }
+	    /**
+	     * returns the element's position and size.
+	     * @returns {DOMRect}
+	     */
+	    position() {
+	        return this.el.getBoundingClientRect();
+	    }
+	    /**
+	     * returns the element's offset position.
+	     * @returns {top: number, left: number}
+	     */
+	    offset() {
+	        const { top, left } = this.el.getBoundingClientRect();
+	        return { top, left };
 	    }
 	}
-	VexdElement.animationsInjected = false;
 
 	/**
 	 * @file vex-doc.ts
 	 * @description Document-level utilities for working with VexdElement.
 	 */
-	class vexdoc {
+	class vexd {
 	    /**
 	     * equivalent to document.querySelector, but returns a VexdElement instance.
 	     * @param {string} selector - CSS selector.
@@ -473,16 +496,6 @@
 	        else {
 	            document.addEventListener("DOMContentLoaded", callback);
 	        }
-	    }
-	    /**
-	     * defines a snippet of HTML that is rendered from an object in the
-	     *
-	     * @template T
-	     * @param {(...args: any[]) => string} template - A template function.
-	     * @returns {{ render: (data: T) => string }} An object with a render method.
-	     */
-	    static snippet(template) {
-	        return (data) => template(data);
 	    }
 	    /**
 	     * sets the document title.
@@ -564,30 +577,110 @@
 	        return Array.from(elements).map((el) => new VexdElement(el));
 	    }
 	    /**
-	     * Provides a reactive signal mechanism.
-	     * @template T
-	     * @param {T} initialValue - The initial value.
-	     * @returns {[ (cb: (oldValue: T, newValue: T) => void) => void, (newValue: T) => void ]}
-	     * Subscribe and setState functions.
+	     * creates a VexdElement from a template literal and returns the
+	     * "top-level" element or container, if there are multiple only the
+	     * first one is returned as to ensure your templates are short as this
+	     * shouldn't be used for massive templates
 	     */
-	    static signal(initialValue) {
-	        let state = initialValue;
-	        const subscribers = [];
-	        const subscribe = (cb) => {
-	            subscribers.push(cb);
+	    static template(strings, ...values) {
+	        const rawHTML = strings.reduce((result, string, i) => {
+	            var _a;
+	            const value = i < values.length ? String((_a = values[i]) !== null && _a !== void 0 ? _a : "") : "";
+	            return result + string + value;
+	        }, "");
+	        const template = document.createElement("template");
+	        template.innerHTML = rawHTML.trim();
+	        const content = template.content;
+	        return new VexdElement(content.firstChild);
+	    }
+	    /**
+	     * a simple state management hook that returns a state and an effect function
+	     *
+	     * "side effects" for when the state changes can be specified using the "effect"
+	     * function or the first item in the array
+	     *
+	     * new state can be set by passing a new value or a function that takes the old
+	     * and the current state can be retrieved by calling the state function with no
+	     * arguments
+	     *
+	     * @param initialState - the initial state
+	     * @returns
+	     */
+	    static state(initialState) {
+	        let _state = initialState;
+	        let _sideEffects = [];
+	        const state = (newState) => {
+	            if (!newState) {
+	                return _state;
+	            }
+	            if (typeof newState === "function") {
+	                const result = newState(_state);
+	                if (result !== undefined) {
+	                    _state = result;
+	                }
+	            }
+	            else {
+	                _state = newState;
+	            }
+	            _sideEffects.forEach((fn) => fn(_state));
+	            return _state;
 	        };
-	        const setState = (newValue) => {
-	            const oldValue = state;
-	            state = newValue;
-	            subscribers.forEach((cb) => cb(oldValue, newValue));
+	        const effect = (fn) => {
+	            _sideEffects.push(fn);
 	        };
-	        const getState = () => state;
-	        return { subscribe, setState, getState };
+	        return [effect, state];
+	    }
+	    /**
+	     * using the timerFn function, a VexdTimer is created with the
+	     * start, stop, and reset methods
+	     * @param timerFn
+	     * @param ms
+	     * @returns
+	     */
+	    static timer(timerFn, ms = 1000) {
+	        let interval = null;
+	        const start = () => {
+	            if (interval) {
+	                stop();
+	            }
+	            interval = setTimeout(timerFn, ms);
+	        };
+	        const stop = () => {
+	            if (!interval)
+	                return;
+	            clearInterval(interval);
+	            interval = null;
+	        };
+	        const reset = () => {
+	            stop();
+	            start();
+	        };
+	        return { start, stop, reset };
+	    }
+	    static interval(timerFn, ms = 1000) {
+	        let interval = null;
+	        const start = () => {
+	            if (interval) {
+	                stop();
+	            }
+	            interval = setInterval(timerFn, ms);
+	        };
+	        const stop = () => {
+	            if (!interval)
+	                return;
+	            clearInterval(interval);
+	            interval = null;
+	        };
+	        const reset = () => {
+	            stop();
+	            start();
+	        };
+	        return { start, stop, reset };
 	    }
 	}
 
 	exports.VexdElement = VexdElement;
-	exports.vexdoc = vexdoc;
+	exports.vexd = vexd;
 
 }));
 //# sourceMappingURL=index.umd.js.map

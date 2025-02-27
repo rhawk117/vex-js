@@ -3,7 +3,8 @@
  * @description Document-level utilities for working with VexdElement.
  */
 import { VexdElement } from "./vexd-element";
-export declare class vexdoc {
+import { VexdState, VexdTimer, VexdInterval } from "./vexd-hooks";
+export declare class vexd {
     /**
      * equivalent to document.querySelector, but returns a VexdElement instance.
      * @param {string} selector - CSS selector.
@@ -31,14 +32,6 @@ export declare class vexdoc {
      * @param {() => void} callback - Callback function.
      */
     static ready(callback: () => void): void;
-    /**
-     * defines a snippet of HTML that is rendered from an object in the
-     *
-     * @template T
-     * @param {(...args: any[]) => string} template - A template function.
-     * @returns {{ render: (data: T) => string }} An object with a render method.
-     */
-    static snippet<T extends object>(template: (props: T) => string): (data: T) => string;
     /**
      * sets the document title.
      * @param {string} title - New title.
@@ -82,15 +75,33 @@ export declare class vexdoc {
      */
     static className(className: string): VexdElement[];
     /**
-     * Provides a reactive signal mechanism.
-     * @template T
-     * @param {T} initialValue - The initial value.
-     * @returns {[ (cb: (oldValue: T, newValue: T) => void) => void, (newValue: T) => void ]}
-     * Subscribe and setState functions.
+     * creates a VexdElement from a template literal and returns the
+     * "top-level" element or container, if there are multiple only the
+     * first one is returned as to ensure your templates are short as this
+     * shouldn't be used for massive templates
      */
-    static signal<T>(initialValue: T): {
-        subscribe: (cb: (oldValue: T, newValue: T) => void) => void;
-        setState: (newValue: T) => void;
-        getState: () => T;
-    };
+    static template(strings: TemplateStringsArray, ...values: any[]): VexdElement;
+    /**
+     * a simple state management hook that returns a state and an effect function
+     *
+     * "side effects" for when the state changes can be specified using the "effect"
+     * function or the first item in the array
+     *
+     * new state can be set by passing a new value or a function that takes the old
+     * and the current state can be retrieved by calling the state function with no
+     * arguments
+     *
+     * @param initialState - the initial state
+     * @returns
+     */
+    static state<T>(initialState: T): VexdState<T>;
+    /**
+     * using the timerFn function, a VexdTimer is created with the
+     * start, stop, and reset methods
+     * @param timerFn
+     * @param ms
+     * @returns
+     */
+    static timer(timerFn: () => void, ms?: number): VexdTimer;
+    static interval(timerFn: () => void, ms?: number): VexdInterval;
 }
