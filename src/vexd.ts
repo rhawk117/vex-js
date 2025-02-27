@@ -4,8 +4,9 @@
  */
 
 import { VexdElement } from "./vexd-element";
+import { VexdState, StateHook, VexdTimer, VexdInterval } from "./vexd-hooks";
 
-export class vexdoc {
+export class vexd {
 	/**
 	 * equivalent to document.querySelector, but returns a VexdElement instance.
 	 * @param {string} selector - CSS selector.
@@ -62,19 +63,6 @@ export class vexdoc {
 		} else {
 			document.addEventListener("DOMContentLoaded", callback);
 		}
-	}
-
-	/**
-	 * defines a snippet of HTML that is rendered from an object in the
-	 *
-	 * @template T
-	 * @param {(...args: any[]) => string} template - A template function.
-	 * @returns {{ render: (data: T) => string }} An object with a render method.
-	 */
-	static snippet<T extends object>(
-		template: (props: T) => string
-	): (data: T) => string {
-		return (data: T) => template(data);
 	}
 
 	/**
@@ -164,28 +152,119 @@ export class vexdoc {
 	}
 
 	/**
-	 * Provides a reactive signal mechanism.
-	 * @template T
-	 * @param {T} initialValue - The initial value.
-	 * @returns {[ (cb: (oldValue: T, newValue: T) => void) => void, (newValue: T) => void ]}
-	 * Subscribe and setState functions.
+	 * creates a VexdElement from a template literal and returns the
+	 * "top-level" element or container, if there are multiple only the
+	 * first one is returned as to ensure your templates are short as this
+	 * shouldn't be used for massive templates
 	 */
-	static signal<T>(initialValue: T): {
-		subscribe: (cb: (oldValue: T, newValue: T) => void) => void;
-		setState: (newValue: T) => void;
-		getState: () => T;
-	} {
-		let state = initialValue;
-		const subscribers: Array<(oldValue: T, newValue: T) => void> = [];
-		const subscribe = (cb: (oldValue: T, newValue: T) => void) => {
-			subscribers.push(cb);
+	static template(
+		strings: TemplateStringsArray,
+		...values: any[]
+	): VexdElement {
+		const rawHTML = strings.reduce((result, string, i) => {
+			const value = i < values.length ? String(values[i] ?? "") : "";
+			return result + string + value;
+		}, "");
+
+		const template = document.createElement("template");
+		template.innerHTML = rawHTML.trim();
+
+		const content = template.content;
+		return new VexdElement(content.firstChild as HTMLElement);
+	}
+
+	/**
+	 * a simple state management hook that returns a state and an effect function
+	 *
+	 * "side effects" for when the state changes can be specified using the "effect"
+	 * function or the first item in the array
+	 *
+	 * new state can be set by passing a new value or a function that takes the old
+	 * and the current state can be retrieved by calling the state function with no
+	 * arguments
+	 *
+	 * @param initialState - the initial state
+	 * @returns
+	 */
+	static state<T>(initialState: T): VexdState<T> {
+		let _state = initialState;
+		let _sideEffects: ((newState: T) => void)[] = [];
+
+		const state = (newState: StateHook<T>): T => {
+			if (!newState) {
+				return _state;
+			}
+			if (typeof newState === "function") {
+				const result = (newState as Function)(_state);
+				if (result !== undefined) {
+					_state = result;
+				}
+			} else {
+				_state = newState;
+			}
+			_sideEffects.forEach((fn) => fn(_state));
+			return _state;
 		};
-		const setState = (newValue: T) => {
-			const oldValue = state;
-			state = newValue;
-			subscribers.forEach((cb) => cb(oldValue, newValue));
+
+		const effect = (fn: (newState: T) => void) => {
+			_sideEffects.push(fn);
 		};
-		const getState = () => state;
-		return { subscribe, setState, getState };
+
+		return [effect, state];
+	}
+
+	/**
+	 * using the timerFn function, a VexdTimer is created with the
+	 * start, stop, and reset methods
+	 * @param timerFn
+	 * @param ms
+	 * @returns
+	 */
+	static timer(timerFn: () => void, ms: number = 1000): VexdTimer {
+		let interval: number | null = null;
+
+		const start = () => {
+			if (interval) {
+				stop();
+			}
+			interval = setTimeout(timerFn, ms);
+		};
+
+		const stop = () => {
+			if (!interval) return;
+			clearInterval(interval);
+			interval = null;
+		};
+
+		const reset = () => {
+			stop();
+			start();
+		};
+
+		return { start, stop, reset };
+	}
+
+	static interval(timerFn: () => void, ms: number = 1000): VexdInterval {
+		let interval: number | null = null;
+
+		const start = () => {
+			if (interval) {
+				stop();
+			}
+			interval = setInterval(timerFn, ms);
+		};
+
+		const stop = () => {
+			if (!interval) return;
+			clearInterval(interval);
+			interval = null;
+		};
+
+		const reset = () => {
+			stop();
+			start();
+		};
+
+		return { start, stop, reset };
 	}
 }
