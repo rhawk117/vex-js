@@ -1,6 +1,5 @@
 {
 	"name": "vexd-js",
-	"version": "1.0.1",
 	"author": "rhawk117",
 	"license": "ISC",
 	"description": "A light weight Vanilla Extension (VEX) for vanilla and jquery like code.",
