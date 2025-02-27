@@ -4,7 +4,7 @@
 	"license": "ISC",
 	"description": "A light weight Vanilla Extension (VEX) for vanilla and jquery like code.",
 	"type": "module",
-	"version": "1.2.2",
+	"version": "1.2.3",
 	"types": "dist/index.d.ts",
 	"main": "dist/index.umd.js",
 	"module": "dist/index.esm.js",
