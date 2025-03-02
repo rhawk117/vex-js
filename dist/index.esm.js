@@ -454,7 +454,7 @@ class Vexd {
     static id(id) {
         const el = document.getElementById(id);
         if (!el)
-            throw new Error(`Element not found with id: ${id}`);
+            throw new Error(`vexd-js: Element not found with id: ${id}`);
         return new VexdElement(el);
     }
     /**
@@ -470,6 +470,11 @@ class Vexd {
             callback(vex, index);
         });
     }
+    /**
+     * querySelectorAll but returns an array of VexdElement instances.
+     * @param selector
+     * @returns
+     */
     static all(selector) {
         const nodeList = document.querySelectorAll(selector);
         return Array.from(nodeList).map((el) => new VexdElement(el));
@@ -553,139 +558,172 @@ class Vexd {
         const content = template.content;
         return new VexdElement(content.firstChild);
     }
-    /**
-     * a simple state management hook that returns a state and an effect function
-     *
-     * "side effects" for when the state changes can be specified using the "effect"
-     * function or the first item in the array
-     *
-     * new state can be set by passing a new value or a function that takes the old
-     * and the current state can be retrieved by calling the state function with no
-     * arguments
-     *
-     * @param initialState - the initial state
-     * @returns
-     */
-    static state(initialState) {
-        let _state = initialState;
-        let _sideEffects = [];
-        const state = (newState) => {
-            if (!newState) {
-                return _state;
-            }
-            if (typeof newState === "function") {
-                const result = newState(_state);
-                _state = result;
-            }
-            else {
-                _state = newState;
-            }
-            if (!_state)
-                throw new Error("VexdNullState: State cannot be null or undefined");
-            _sideEffects.forEach((fn) => fn(_state));
-            return _state;
-        };
-        const effect = (fn, triggerNow = true) => {
-            _sideEffects.push(fn);
-            if (triggerNow)
-                fn(_state);
-        };
-        return { state, effect };
-    }
-    /**
-     * using the timerFn function, a VexdTimer is created with the
-     * start, stop, and reset methods
-     * @param timerFn
-     * @param ms
-     * @returns {VexdTimer}
-     */
-    static timer(timerFn, ms = 1000) {
-        let interval = null;
-        const start = () => {
-            if (interval) {
-                stop();
-            }
-            interval = setTimeout(timerFn, ms);
-        };
-        const stop = () => {
-            if (!interval)
-                return;
-            clearInterval(interval);
-            interval = null;
-        };
-        const reset = () => {
-            stop();
-            start();
-        };
-        return { start, stop, reset };
-    }
-    /**
-     * Creates a VexdInterval that can be used to run the timerFn parameter
-     * every "nth" ms
-     * @param timerFn
-     * @param ms
-     * @returns {VexdInterval}
-     */
-    static interval(timerFn, ms = 1000) {
-        let interval = null;
-        const start = () => {
-            if (interval)
-                stop();
-            interval = setInterval(timerFn, ms);
-        };
-        const stop = () => {
-            if (!interval)
-                return;
-            clearInterval(interval);
-            interval = null;
-        };
-        const reset = () => {
-            stop();
-            start();
-        };
-        return { start, stop, reset };
-    }
-    /**
-     * creates a basic signal that can be used to trigger updates
-     * the signalSetter function is called to get the current value
-     * when the signal is emitted and all of the subscribers are
-     * called with the new value
-     * @param signalSetter
-     * @param initialValue
-     * @returns
-     */
-    static signal(signalSetter, initialValue) {
-        let subscribers = [];
-        const subscribe = (callback) => {
-            subscribers.push(callback);
-        };
-        const broadcast = (value) => {
-            signalSetter();
-            subscribers.forEach((callback) => callback(value));
-        };
-        return [subscribe, broadcast];
-    }
     static on(event, callback) {
         document.addEventListener(event, callback);
         return () => document.removeEventListener(event, callback);
     }
-    static effectStore() {
-        const effects = [];
-        const addEffect = (effect) => {
-            effects.push(effect);
-            return () => {
-                const index = effects.indexOf(effect);
-                if (index > -1)
-                    effects.splice(index, 1);
-            };
+}
+
+/**
+ * Core reactive state management class
+ */
+class VexdState {
+    constructor(initialValue) {
+        this.subscribers = [];
+        this.value = initialValue;
+    }
+    get state() {
+        return this.value;
+    }
+    /**
+     * Update state with a new value or using a function that receives the previous state
+     * @param newState New value or function to transform the current state
+     */
+    setState(newState) {
+        const previousValue = this.value;
+        if (typeof newState === "function") {
+            this.value = newState(previousValue);
+        }
+        else {
+            this.value = newState;
+        }
+        if (this.value !== previousValue) {
+            this.subscribers.forEach((subscriber) => subscriber(this.value));
+        }
+    }
+    /**
+     * Register a side effect function that runs on state changes
+     * @param fn Function to execute when state changes
+     * @param triggerNow Whether to execute the function immediately
+     * @returns Unsubscribe function
+     */
+    sideEffect(fn, triggerNow = false) {
+        if (triggerNow) {
+            fn(this.value);
+        }
+        this.subscribers.push(fn);
+        return () => {
+            const index = this.subscribers.indexOf(fn);
+            if (index !== -1)
+                this.subscribers.splice(index, 1);
         };
-        const dispose = () => {
-            effects.forEach((effect) => effect());
-            effects.length = 0;
-        };
-        return [addEffect, dispose];
+    }
+    /**
+     * Remove all subscribers
+     */
+    clear() {
+        this.subscribers = [];
+    }
+}
+/**
+ * extended state management class for arrays with helper methods
+ */
+class VexdStateList extends VexdState {
+    /**
+     * add an item to the list
+     * @param item Item to add
+     */
+    add(item) {
+        this.setState((oldState) => [...oldState, item]);
+    }
+    /**
+     * Remove items that match the predicate
+     * @param predicate Function that returns true for items to keep
+     */
+    remove(predicate) {
+        this.setState((oldState) => oldState.filter((item) => !predicate(item)));
+    }
+    /**
+     * Transform each item in the list
+     * @param callback Mapping function
+     */
+    map(callback) {
+        this.setState((oldState) => oldState.map(callback));
+    }
+    /**
+     * Find an item in the list
+     * @param predicate Function that returns true when the desired item is found
+     * @returns The found item or undefined
+     */
+    find(predicate) {
+        return this.state.find(predicate);
+    }
+    /**
+     * Filter the list without modifying the original
+     * @param predicate Function that returns true for items to include
+     * @returns A new filtered array
+     */
+    filter(predicate) {
+        return this.state.filter(predicate);
     }
 }
 
-export { Vexd, VexdElement };
+/**
+ * Creates a managed interval that can be started, stopped, and reset
+ * @param timerFn Function to execute on each interval
+ * @param ms Millisecond interval (defaults to 1000ms)
+ * @returns Controlled interval hook
+ */
+function createInterval(timerFn, ms = 1000) {
+    let intervalId = null;
+    const start = () => {
+        if (intervalId)
+            stop();
+        intervalId = setInterval(timerFn, ms);
+    };
+    const stop = () => {
+        if (!intervalId)
+            return;
+        clearInterval(intervalId);
+        intervalId = null;
+    };
+    const reset = () => {
+        stop();
+        start();
+    };
+    return { start, stop, reset };
+}
+/**
+ * Creates a managed timeout that can be started, stopped, and reset
+ * @param timerFn Function to execute after the timeout
+ * @param ms Millisecond delay (defaults to 1000ms)
+ * @returns Controlled timeout hook
+ */
+function createTimer(timerFn, ms = 1000) {
+    let timeoutId = null;
+    const start = () => {
+        if (timeoutId)
+            stop();
+        timeoutId = setTimeout(timerFn, ms);
+    };
+    const stop = () => {
+        if (!timeoutId)
+            return;
+        clearTimeout(timeoutId);
+        timeoutId = null;
+    };
+    const reset = () => {
+        stop();
+        start();
+    };
+    return { start, stop, reset };
+}
+/**
+ * create a reactive state container
+ * @param initialValue Initial state value
+ * @returns A VexdState instance
+ */
+function state(initialValue) {
+    return new VexdState(initialValue);
+}
+/**
+ * create a reactive state container for an array
+ * @param initialValue Initial array value
+ * @returns A VexdStateList instance
+ */
+function stateList(initialValue = []) {
+    return new VexdStateList(initialValue);
+}
+
+export { Vexd, VexdElement, VexdState, VexdStateList, createInterval, createTimer, state, stateList };
 //# sourceMappingURL=index.esm.js.map

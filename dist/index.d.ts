@@ -1,6 +1,7 @@
 /**
  * @file index.ts
- * @description Entry point for the VEX-JS framework, exports all public APIs
+ * @description Entry point for the vexd-js framework, exports all public APIs
  */
 export { Vexd } from "./vexd";
 export { VexdElement } from "./vexd-element";
+export { state, stateList, createInterval, createTimer, VexdState, VexdStateList, } from "./vexd-hooks";

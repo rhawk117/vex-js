@@ -4,14 +4,6 @@
  */
 
 import { VexdElement } from "./vexd-element";
-import {
-	VexdState,
-	VexdTimer,
-	VexdInterval,
-	EffectStore,
-	OptionalFunctionOrValue,
-	VexdSignal,
-} from "../dist/vexd-hooks";
 
 export class Vexd {
 	/**
@@ -34,7 +26,7 @@ export class Vexd {
 	 */
 	static id(id: string): VexdElement {
 		const el = document.getElementById(id);
-		if (!el) throw new Error(`Element not found with id: ${id}`);
+		if (!el) throw new Error(`vexd-js: Element not found with id: ${id}`);
 		return new VexdElement(el);
 	}
 
@@ -55,6 +47,11 @@ export class Vexd {
 		});
 	}
 
+	/**
+	 * querySelectorAll but returns an array of VexdElement instances.
+	 * @param selector 
+	 * @returns 
+	 */
 	static all(selector: string): VexdElement[] {
 		const nodeList = document.querySelectorAll(selector);
 		return Array.from(nodeList).map((el) => new VexdElement(el as HTMLElement));
@@ -151,144 +148,9 @@ export class Vexd {
 		return new VexdElement(content.firstChild as HTMLElement);
 	}
 
-	/**
-	 * a simple state management hook that returns a state and an effect function
-	 *
-	 * "side effects" for when the state changes can be specified using the "effect"
-	 * function or the first item in the array
-	 *
-	 * new state can be set by passing a new value or a function that takes the old
-	 * and the current state can be retrieved by calling the state function with no
-	 * arguments
-	 *
-	 * @param initialState - the initial state
-	 * @returns
-	 */
-	static state<T>(initialState: T): VexdState<T> {
-		let _state = initialState;
-		let _sideEffects: ((newState: T) => void)[] = [];
-		const state = (newState?: OptionalFunctionOrValue): T => {
-			if (!newState) {
-				return _state;
-			}
-			if (typeof newState === "function") {
-				const result = (newState as Function)(_state);
-				_state = result;
-			} else {
-				_state = newState;
-			}
-			if (!_state)
-				throw new Error("VexdNullState: State cannot be null or undefined");
-			_sideEffects.forEach((fn) => fn(_state));
-			return _state;
-		};
-		const effect = (fn: (newState: T) => void, triggerNow = true) => {
-			_sideEffects.push(fn);
-			if (triggerNow) fn(_state);
-		};
-
-		return { state, effect };
-	}
-
-	/**
-	 * using the timerFn function, a VexdTimer is created with the
-	 * start, stop, and reset methods
-	 * @param timerFn
-	 * @param ms
-	 * @returns {VexdTimer}
-	 */
-	static timer(timerFn: () => void, ms: number = 1000): VexdTimer {
-		let interval: number | null = null;
-
-		const start = () => {
-			if (interval) {
-				stop();
-			}
-			interval = setTimeout(timerFn, ms);
-		};
-
-		const stop = () => {
-			if (!interval) return;
-			clearInterval(interval);
-			interval = null;
-		};
-
-		const reset = () => {
-			stop();
-			start();
-		};
-
-		return { start, stop, reset };
-	}
-
-	/**
-	 * Creates a VexdInterval that can be used to run the timerFn parameter
-	 * every "nth" ms
-	 * @param timerFn
-	 * @param ms
-	 * @returns {VexdInterval}
-	 */
-	static interval(timerFn: () => void, ms: number = 1000): VexdInterval {
-		let interval: number | null = null;
-		const start = () => {
-			if (interval) stop();
-			interval = setInterval(timerFn, ms);
-		};
-		const stop = () => {
-			if (!interval) return;
-			clearInterval(interval);
-			interval = null;
-		};
-		const reset = () => {
-			stop();
-			start();
-		};
-
-		return { start, stop, reset };
-	}
-
-	/**
-	 * creates a basic signal that can be used to trigger updates
-	 * the signalSetter function is called to get the current value
-	 * when the signal is emitted and all of the subscribers are
-	 * called with the new value
-	 * @param signalSetter
-	 * @param initialValue
-	 * @returns
-	 */
-	static signal<T>(signalSetter: () => T, initialValue?: T): VexdSignal<T> {
-		let signalValue = initialValue;
-		let subscribers: ((value: T) => void)[] = [];
-		const subscribe = (callback: (value: T) => void) => {
-			subscribers.push(callback);
-		};
-		const broadcast = (value: T) => {
-			signalValue = signalSetter();
-			subscribers.forEach((callback) => callback(value));
-		};
-		return [subscribe, broadcast];
-	}
 
 	static on(event: string, callback: VoidFunction): VoidFunction {
 		document.addEventListener(event, callback);
 		return () => document.removeEventListener(event, callback);
-	}
-
-	static effectStore(): EffectStore {
-		const effects: (() => void)[] = [];
-		const addEffect = (effect: () => void) => {
-			effects.push(effect);
-			return () => {
-				const index = effects.indexOf(effect);
-				if (index > -1) effects.splice(index, 1);
-			};
-		};
-
-		const dispose = () => {
-			effects.forEach((effect) => effect());
-			effects.length = 0;
-		};
-
-		return [addEffect, dispose] as const;
 	}
 }

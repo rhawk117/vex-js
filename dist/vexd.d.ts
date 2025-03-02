@@ -3,7 +3,6 @@
  * @description Document-level utilities for working with VexdElement.
  */
 import { VexdElement } from "./vexd-element";
-import { VexdState, VexdTimer, VexdInterval, EffectStore, VexdSignal } from "./vexd-hooks";
 export declare class Vexd {
     /**
      * equivalent to document.querySelector, but returns a VexdElement instance.
@@ -26,6 +25,11 @@ export declare class Vexd {
      * @returns {VexdElement[]} Array of VexdElement instances.
      */
     static each(selector: string, callback: (vex: VexdElement, index: number) => void): void;
+    /**
+     * querySelectorAll but returns an array of VexdElement instances.
+     * @param selector
+     * @returns
+     */
     static all(selector: string): VexdElement[];
     /**
      * executes a callback once the DOM is fully loaded.
@@ -69,46 +73,5 @@ export declare class Vexd {
      * shouldn't be used for massive templates
      */
     static template(strings: TemplateStringsArray, ...values: any[]): VexdElement;
-    /**
-     * a simple state management hook that returns a state and an effect function
-     *
-     * "side effects" for when the state changes can be specified using the "effect"
-     * function or the first item in the array
-     *
-     * new state can be set by passing a new value or a function that takes the old
-     * and the current state can be retrieved by calling the state function with no
-     * arguments
-     *
-     * @param initialState - the initial state
-     * @returns
-     */
-    static state<T>(initialState: T): VexdState<T>;
-    /**
-     * using the timerFn function, a VexdTimer is created with the
-     * start, stop, and reset methods
-     * @param timerFn
-     * @param ms
-     * @returns {VexdTimer}
-     */
-    static timer(timerFn: () => void, ms?: number): VexdTimer;
-    /**
-     * Creates a VexdInterval that can be used to run the timerFn parameter
-     * every "nth" ms
-     * @param timerFn
-     * @param ms
-     * @returns {VexdInterval}
-     */
-    static interval(timerFn: () => void, ms?: number): VexdInterval;
-    /**
-     * creates a basic signal that can be used to trigger updates
-     * the signalSetter function is called to get the current value
-     * when the signal is emitted and all of the subscribers are
-     * called with the new value
-     * @param signalSetter
-     * @param initialValue
-     * @returns
-     */
-    static signal<T>(signalSetter: () => T, initialValue?: T): VexdSignal<T>;
     static on(event: string, callback: VoidFunction): VoidFunction;
-    static effectStore(): EffectStore;
 }
