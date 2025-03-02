@@ -11,4 +11,5 @@ export {
 	createTimer,
 	VexdState,
 	VexdStateList,
+	effectStore
 } from "./vexd-hooks";

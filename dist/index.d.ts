@@ -4,4 +4,4 @@
  */
 export { Vexd } from "./vexd";
 export { VexdElement } from "./vexd-element";
-export { state, stateList, createInterval, createTimer, VexdState, VexdStateList, } from "./vexd-hooks";
+export { state, stateList, createInterval, createTimer, VexdState, VexdStateList, effectStore } from "./vexd-hooks";

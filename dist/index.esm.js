@@ -709,6 +709,28 @@ function createTimer(timerFn, ms = 1000) {
     return { start, stop, reset };
 }
 /**
+ * Creates a store for tracking and disposing of effects
+ * @returns A tuple containing an addEffect function and a dispose function
+ */
+function effectStore() {
+    const effects = [];
+    const addEffect = (effect) => {
+        effects.push(effect);
+        return () => {
+            const index = effects.indexOf(effect);
+            if (index !== -1)
+                effects.splice(index, 1);
+        };
+    };
+    const dispose = () => {
+        effects.forEach((disposeFn) => {
+            if (disposeFn)
+                disposeFn();
+        });
+    };
+    return [addEffect, dispose];
+}
+/**
  * create a reactive state container
  * @param initialValue Initial state value
  * @returns A VexdState instance
@@ -725,5 +747,5 @@ function stateList(initialValue = []) {
     return new VexdStateList(initialValue);
 }
 
-export { Vexd, VexdElement, VexdState, VexdStateList, createInterval, createTimer, state, stateList };
+export { Vexd, VexdElement, VexdState, VexdStateList, createInterval, createTimer, effectStore, state, stateList };
 //# sourceMappingURL=index.esm.js.map
